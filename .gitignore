@@ -1,0 +1,7 @@
+*
+!*/
+!*.*
+.settings
+.vscode
+Debug/
+Release/
