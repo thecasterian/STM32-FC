@@ -1,0 +1,54 @@
+Designator,Val,Package,Mid X,Mid Y,Rotation,Layer
+C1,10uF,C_0603_1608Metric_Pad1.08x0.95mm_HandSolder,146.5,-90.7,0.0,top
+C2,100nF,C_0603_1608Metric_Pad1.08x0.95mm_HandSolder,129.8,-106.0,90.0,top
+C3,100nF,C_0603_1608Metric_Pad1.08x0.95mm_HandSolder,143.0,-93.5,90.0,top
+C4,30pF,C_0603_1608Metric_Pad1.08x0.95mm_HandSolder,140.65,-94.85,-90.0,top
+C5,30pF,C_0603_1608Metric_Pad1.08x0.95mm_HandSolder,140.65,-98.15,-90.0,top
+C6,100nF,C_0603_1608Metric_Pad1.08x0.95mm_HandSolder,147.0,-107.75,180.0,top
+C7,2.2uF,C_0603_1608Metric_Pad1.08x0.95mm_HandSolder,156.5,-106.0,180.0,top
+C8,2.2uF,C_0603_1608Metric_Pad1.08x0.95mm_HandSolder,156.0,-93.5,90.0,top
+C9,100nF,C_0603_1608Metric_Pad1.08x0.95mm_HandSolder,154.6,-107.75,0.0,top
+C10,100nF,C_0603_1608Metric_Pad1.08x0.95mm_HandSolder,157.75,-95.4,90.0,top
+C11,100nF,C_0603_1608Metric_Pad1.08x0.95mm_HandSolder,146.5,-92.25,0.0,top
+C12,1uF,C_0603_1608Metric_Pad1.08x0.95mm_HandSolder,139.9,-102.0,90.0,top
+C13,100nF,C_0603_1608Metric_Pad1.08x0.95mm_HandSolder,141.4,-102.0,90.0,top
+C14,10uF,C_0603_1608Metric_Pad1.08x0.95mm_HandSolder,164.6,-103.65,180.0,top
+C15,100nF,C_0603_1608Metric_Pad1.08x0.95mm_HandSolder,174.35,-106.3,90.0,top
+C16,10uF,C_0603_1608Metric_Pad1.08x0.95mm_HandSolder,175.85,-106.3,90.0,top
+C17,100nF,C_0603_1608Metric_Pad1.08x0.95mm_HandSolder,146.25,-114.8,180.0,top
+C18,100nF,C_0603_1608Metric_Pad1.08x0.95mm_HandSolder,142.4,-112.3,-90.0,top
+C19,10uF,C_0603_1608Metric_Pad1.08x0.95mm_HandSolder,154.4,-112.5,-90.0,top
+C20,100nF,C_0603_1608Metric_Pad1.08x0.95mm_HandSolder,152.9,-112.5,-90.0,top
+C21,100nF,C_0603_1608Metric_Pad1.08x0.95mm_HandSolder,152.1,-110.1,0.0,top
+C22,220nF,C_0603_1608Metric_Pad1.08x0.95mm_HandSolder,150.5,-115.0,0.0,top
+C23,100nF,C_0603_1608Metric_Pad1.08x0.95mm_HandSolder,161.0,-112.5,-90.0,top
+C24,100nF,C_0603_1608Metric_Pad1.08x0.95mm_HandSolder,158.5,-115.15,180.0,top
+D1,B5819W,D_SOD-123,169.0,-101.0,0.0,top
+D2,Red,LED_0603_1608Metric_Pad1.05x0.95mm_HandSolder,164.6,-105.3,0.0,top
+D3,Red,LED_0603_1608Metric_Pad1.05x0.95mm_HandSolder,133.2,-100.5,0.0,top
+D4,Green,LED_0603_1608Metric_Pad1.05x0.95mm_HandSolder,133.2,-98.8,0.0,top
+D5,Blue,LED_0603_1608Metric_Pad1.05x0.95mm_HandSolder,133.2,-97.1,0.0,top
+J1,USB_B_Micro,USB_Micro-B_Molex-105017-0001,174.0,-97.65,90.0,top
+J2,2.54mm Male,PinHeader_1x03_P2.54mm_Vertical,160.975,-92.0,90.0,top
+J3,2.54mm Male,PinHeader_2x03_P2.54mm_Vertical,143.475,-85.275,90.0,top
+J4,PWM_Conn_3x04,PWM_Conn_3x04,152.0,-123.0,0.0,top
+Q1,S9013,SOT-23-3,159.5,-84.35,270.0,top
+R1,100k,R_0603_1608Metric_Pad0.98x0.95mm_HandSolder,147.5875,-88.4,180.0,top
+R2,1.5k,R_0603_1608Metric_Pad0.98x0.95mm_HandSolder,164.5,-96.5,-90.0,top
+R3,10k,R_0603_1608Metric_Pad0.98x0.95mm_HandSolder,153.0,-81.0,180.0,top
+R4,1k,R_0603_1608Metric_Pad0.98x0.95mm_HandSolder,160.2,-87.2,180.0,top
+R5,10k,R_0603_1608Metric_Pad0.98x0.95mm_HandSolder,153.0,-82.5,180.0,top
+R6,10k,R_0603_1608Metric_Pad0.98x0.95mm_HandSolder,158.5875,-81.75,0.0,top
+R7,10k,R_0603_1608Metric_Pad0.98x0.95mm_HandSolder,153.0,-84.0,180.0,top
+R8,1k,R_0603_1608Metric_Pad0.98x0.95mm_HandSolder,163.7,-107.8,-90.0,top
+R9,1k,R_0603_1608Metric_Pad0.98x0.95mm_HandSolder,133.2,-92.4,0.0,top
+R10,1k,R_0603_1608Metric_Pad0.98x0.95mm_HandSolder,133.2,-93.9,0.0,top
+R11,1k,R_0603_1608Metric_Pad0.98x0.95mm_HandSolder,133.2,-95.4,0.0,top
+SW1,Tactile Switch,SW_TS-1187A-B-A-B,134.5,-106.0,0.0,top
+U1,STM32F405RGTx,LQFP-64_10x10mm_P0.5mm,150.0,-100.0,270.0,top
+U2,USBLC6-2SC6,SOT-23-6,168.0,-98.0,0.0,top
+U3,AMS1117-3.3,SOT-223-3_TabPin2,170.0,-106.8,90.0,top
+U4,BMI088,PQFN50P450X300X100-16N,146.0,-112.0,180.0,top
+U5,LIS2MDLTR,PQFN50P200X200X70-12N,150.5,-112.5,0.0,top
+U6,BMP280,Bosch_LGA-8_2x2.5mm_P0.65mm_ClockwisePinNumbering,158.5,-112.5,180.0,top
+Y1,8MHz,Crystal_SMD_5032-2Pin_5.0x3.2mm,138.0,-96.5,-90.0,top
