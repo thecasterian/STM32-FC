@@ -4,4 +4,6 @@
 void setup(void);
 void loop(void);
 
+int _write(int file, char *ptr, int len);
+
 #endif
