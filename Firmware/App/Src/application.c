@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "application.h"
 #include "bmi088.h"
+#include "bmp280.h"
 #include "lis2mdl.h"
 #include "main.h"
 #include "timer.h"
@@ -9,8 +10,7 @@
 
 static Bmi088 bmi088;
 static Lis2mdl lis2mdl;
-
-uint8_t dump[128];
+static Bmp280 bmp280;
 
 void setup(void) {
     timer_init(&timer_cntl, &htim6);
@@ -21,16 +21,20 @@ void setup(void) {
 
     lis2mdl_init(&lis2mdl, &hspi1, MAG_NSS_GPIO_Port, MAG_NSS_Pin);
     lis2mdl_set_odr(&lis2mdl, LIS2MDL_ODR_100Hz);
+
+    bmp280_init(&bmp280, &hspi1, BARO_NSS_GPIO_Port, BARO_NSS_Pin);
+    bmp280_set_param(&bmp280, BMP280_OSPL_X16, BMP280_OSPL_X2, BMP280_STBY_TIME_0_5_MS, BMP280_IIR_COEFF_16);
 }
 
 void loop(void) {
-    float acc_raw[3], gyro_raw[3], mag_raw[3], acc[3], gyro[3], mag[3];
-    uint8_t buf[37];
+    float acc_raw[3], gyro_raw[3], mag_raw[3], acc[3], gyro[3], mag[3], pres;
+    uint8_t buf[41];
 
     if (timer_cntl.period_elapsed) {
         bmi088_read_acc(&bmi088, acc_raw);
         bmi088_read_gyro(&bmi088, gyro_raw);
         lis2mdl_read_mag(&lis2mdl, mag_raw);
+        bmp280_read_pres(&bmp280, &pres);
 
         /* Change axis. */
         acc[0] = -acc_raw[0];
@@ -47,6 +51,7 @@ void loop(void) {
         memcpy(&buf[1], acc, sizeof(acc));
         memcpy(&buf[13], gyro, sizeof(gyro));
         memcpy(&buf[25], mag, sizeof(mag));
+        memcpy(&buf[37], &pres, sizeof(pres));
         _write(1, (char *)buf, sizeof(buf));
 
         timer_cntl.period_elapsed = false;
