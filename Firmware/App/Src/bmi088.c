@@ -103,7 +103,7 @@ void bmi088_set_range(Bmi088 *bmi088, Bmi088AccRange acc_range, Bmi088GyroRange 
 }
 
 void bmi088_set_odr(Bmi088 *bmi088, Bmi088AccOdr acc_odr, Bmi088AccBwp acc_bwp, Bmi088GyroOdrBwp gyro_odr_bwp) {
-    bmi088_write_acc_reg(bmi088, REG_ACC_CONF, (acc_bwp << 4) | acc_odr);
+    bmi088_write_acc_reg(bmi088, REG_ACC_CONF, acc_bwp | acc_odr);
     bmi088_write_gyro_reg(bmi088, REG_GYRO_BANDWIDTH, gyro_odr_bwp);
 }
 

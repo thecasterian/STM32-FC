@@ -1,7 +1,6 @@
 #ifndef BMI088_H
 #define BMI088_H
 
-#include <stdbool.h>
 #include "spi.h"
 
 /* BMI088 accelerometer maximum measurement range. */
@@ -36,9 +35,9 @@ typedef enum {
 /* BMI088 accelerometer low-pass filter bandwidth parameter. Refer to the 3 dB cut-off frequency of the digital low-pass
    filter in section 4.4.1 of the datasheet. */
 typedef enum {
-    BMI088_ACC_BWP_NORMAL = 0x0A,               /* No oversampling. */
-    BMI088_ACC_BWP_OSR2   = 0x09,               /* 2-fold oversampling. */
-    BMI088_ACC_BWP_OSR4   = 0x08,               /* 4-fold oversampling. */
+    BMI088_ACC_BWP_NORMAL = 0xA0,               /* No oversampling. */
+    BMI088_ACC_BWP_OSR2   = 0x90,               /* 2-fold oversampling. */
+    BMI088_ACC_BWP_OSR4   = 0x80,               /* 4-fold oversampling. */
 } Bmi088AccBwp;
 
 /* BMI088 gyro output data rate (ODR) and low-pass filter bandwidth parameter. Refer to the filter bandwidth of in
