@@ -31,10 +31,10 @@ static const float magcal_b[3] = {
     MAG_HARD_IRON_Z,
 };
 
-static void lis2mdl_read_reg(Lis2mdl *lis2mdl, uint8_t reg, uint8_t *data, uint16_t size);
-static void lis2mdl_write_reg(Lis2mdl *lis2mdl, uint8_t reg, uint8_t data);
+static void lis2mdl_read_reg(lis2mdl_t *lis2mdl, uint8_t reg, uint8_t *data, uint16_t size);
+static void lis2mdl_write_reg(lis2mdl_t *lis2mdl, uint8_t reg, uint8_t data);
 
-void lis2mdl_init(Lis2mdl *lis2mdl, SPI_HandleTypeDef *hspi, GPIO_TypeDef *nss_port, uint16_t nss_pin) {
+void lis2mdl_init(lis2mdl_t *lis2mdl, SPI_HandleTypeDef *hspi, GPIO_TypeDef *nss_port, uint16_t nss_pin) {
     lis2mdl->hspi = hspi;
     lis2mdl->nss_port = nss_port;
     lis2mdl->nss_pin = nss_pin;
@@ -53,11 +53,11 @@ void lis2mdl_init(Lis2mdl *lis2mdl, SPI_HandleTypeDef *hspi, GPIO_TypeDef *nss_p
     lis2mdl_write_reg(lis2mdl, REG_CFG_REG_A, COMP_TEMP_EN | MD_CONT);
 }
 
-void lis2mdl_set_odr(Lis2mdl *lis2mdl, Lis2mdlOdr odr) {
+void lis2mdl_set_odr(lis2mdl_t *lis2mdl, lis2mdl_odr_t odr) {
     lis2mdl_write_reg(lis2mdl, REG_CFG_REG_A, COMP_TEMP_EN | MD_CONT | odr);
 }
 
-void lis2mdl_read_mag(Lis2mdl *lis2mdl, float *mag) {
+void lis2mdl_read_mag(lis2mdl_t *lis2mdl, float *mag) {
     uint8_t data[6];
     uint16_t x;
     float uncal[3];
@@ -79,7 +79,7 @@ void lis2mdl_read_mag(Lis2mdl *lis2mdl, float *mag) {
     }
 }
 
-static void lis2mdl_read_reg(Lis2mdl *lis2mdl, uint8_t reg, uint8_t *data, uint16_t size) {
+static void lis2mdl_read_reg(lis2mdl_t *lis2mdl, uint8_t reg, uint8_t *data, uint16_t size) {
     uint8_t tx_buf[1] = {reg | FLAG_READ};
 
     HAL_GPIO_WritePin(lis2mdl->nss_port, lis2mdl->nss_pin, GPIO_PIN_RESET);
@@ -88,7 +88,7 @@ static void lis2mdl_read_reg(Lis2mdl *lis2mdl, uint8_t reg, uint8_t *data, uint1
     HAL_GPIO_WritePin(lis2mdl->nss_port, lis2mdl->nss_pin, GPIO_PIN_SET);
 }
 
-static void lis2mdl_write_reg(Lis2mdl *lis2mdl, uint8_t reg, uint8_t data) {
+static void lis2mdl_write_reg(lis2mdl_t *lis2mdl, uint8_t reg, uint8_t data) {
     uint8_t tx_buf[2] = {reg, data};
 
     HAL_GPIO_WritePin(lis2mdl->nss_port, lis2mdl->nss_pin, GPIO_PIN_RESET);

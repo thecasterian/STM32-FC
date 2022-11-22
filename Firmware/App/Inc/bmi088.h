@@ -9,7 +9,7 @@ typedef enum {
     BMI088_ACC_RANGE_6G  = 0x01,
     BMI088_ACC_RANGE_12G = 0x02,
     BMI088_ACC_RANGE_24G = 0x03,
-} Bmi088AccRange;
+} bmi088_acc_range_t;
 
 /* BMI088 gyro maximum measurement range. */
 typedef enum {
@@ -18,7 +18,7 @@ typedef enum {
     BMI088_GYRO_RANGE_500DPS  = 0x02,
     BMI088_GYRO_RANGE_1000DPS = 0x01,
     BMI088_GYRO_RANGE_2000DPS = 0x00,
-} Bmi088GyroRange;
+} bmi088_gyro_range_t;
 
 /* BMI088 accelerometer output data rate (ODR). */
 typedef enum {
@@ -30,7 +30,7 @@ typedef enum {
     BMI088_ACC_ODR_400HZ  = 0x0A,
     BMI088_ACC_ODR_800HZ  = 0x0B,
     BMI088_ACC_ODR_1600HZ = 0x0C,
-} Bmi088AccOdr;
+} bmi088_acc_odr_t;
 
 /* BMI088 accelerometer low-pass filter bandwidth parameter. Refer to the 3 dB cut-off frequency of the digital low-pass
    filter in section 4.4.1 of the datasheet. */
@@ -38,7 +38,7 @@ typedef enum {
     BMI088_ACC_BWP_NORMAL = 0xA0,               /* No oversampling. */
     BMI088_ACC_BWP_OSR2   = 0x90,               /* 2-fold oversampling. */
     BMI088_ACC_BWP_OSR4   = 0x80,               /* 4-fold oversampling. */
-} Bmi088AccBwp;
+} bmi088_acc_bwp_t;
 
 /* BMI088 gyro output data rate (ODR) and low-pass filter bandwidth parameter. Refer to the filter bandwidth of in
    section 5.5.6 of the datasheet. */
@@ -51,7 +51,7 @@ typedef enum {
     BMI088_GYRO_ODR_1000HZ_BWP_116HZ = 0x02,
     BMI088_GYRO_ODR_2000HZ_BWP_230HZ = 0x01,
     BMI088_GYRO_ODR_2000HZ_BWP_532HZ = 0x00,
-} Bmi088GyroOdrBwp;
+} bmi088_gyro_odr_bwp;
 
 typedef struct {
     SPI_HandleTypeDef *hspi;
@@ -64,16 +64,17 @@ typedef struct {
     uint8_t acc_chip_id;
     uint8_t gyro_chip_id;
 
-    Bmi088AccRange acc_range;
-    Bmi088GyroRange gyro_range;
-} Bmi088;
+    bmi088_acc_range_t acc_range;
+    bmi088_gyro_range_t gyro_range;
+} bmi088_t;
 
-void bmi088_init(Bmi088 *bmi088, SPI_HandleTypeDef *hspi, GPIO_TypeDef *acc_nss_port, uint16_t acc_nss_pin,
+void bmi088_init(bmi088_t *bmi088, SPI_HandleTypeDef *hspi, GPIO_TypeDef *acc_nss_port, uint16_t acc_nss_pin,
                  GPIO_TypeDef *gyro_nss_port, uint16_t gyro_nss_pin);
-void bmi088_set_range(Bmi088 *bmi088, Bmi088AccRange acc_range, Bmi088GyroRange gyro_range);
-void bmi088_set_odr(Bmi088 *bmi088, Bmi088AccOdr acc_odr, Bmi088AccBwp acc_bwp, Bmi088GyroOdrBwp gyro_odr_bwp);
+void bmi088_set_range(bmi088_t *bmi088, bmi088_acc_range_t acc_range, bmi088_gyro_range_t gyro_range);
+void bmi088_set_odr(bmi088_t *bmi088, bmi088_acc_odr_t acc_odr, bmi088_acc_bwp_t acc_bwp,
+                    bmi088_gyro_odr_bwp gyro_odr_bwp);
 
-void bmi088_read_acc(Bmi088 *bmi088, float *acc);
-void bmi088_read_gyro(Bmi088 *bmi088, float *gyro);
+void bmi088_read_acc(bmi088_t *bmi088, float *acc);
+void bmi088_read_gyro(bmi088_t *bmi088, float *gyro);
 
 #endif

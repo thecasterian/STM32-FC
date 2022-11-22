@@ -53,17 +53,17 @@ static const float gyro_bias[3] = {
     GYRO_BIAS_Z,
 };
 
-static void bmi088_soft_reset_acc(Bmi088 *bmi088);
-static void bmi088_power_on(Bmi088 *bmi088);
+static void bmi088_soft_reset_acc(bmi088_t *bmi088);
+static void bmi088_power_on(bmi088_t *bmi088);
 
-static void bmi088_read_acc_dummy(Bmi088 *bmi088);
+static void bmi088_read_acc_dummy(bmi088_t *bmi088);
 
-static void bmi088_read_acc_reg(Bmi088 *bmi088, uint8_t reg, uint8_t *data, uint16_t size);
-static void bmi088_write_acc_reg(Bmi088 *bmi088, uint8_t reg, uint8_t data);
-static void bmi088_read_gyro_reg(Bmi088 *bmi088, uint8_t reg, uint8_t *data, uint16_t size);
-static void bmi088_write_gyro_reg(Bmi088 *bmi088, uint8_t reg, uint8_t data);
+static void bmi088_read_acc_reg(bmi088_t *bmi088, uint8_t reg, uint8_t *data, uint16_t size);
+static void bmi088_write_acc_reg(bmi088_t *bmi088, uint8_t reg, uint8_t data);
+static void bmi088_read_gyro_reg(bmi088_t *bmi088, uint8_t reg, uint8_t *data, uint16_t size);
+static void bmi088_write_gyro_reg(bmi088_t *bmi088, uint8_t reg, uint8_t data);
 
-void bmi088_init(Bmi088 *bmi088, SPI_HandleTypeDef *hspi, GPIO_TypeDef *acc_nss_port, uint16_t acc_nss_pin,
+void bmi088_init(bmi088_t *bmi088, SPI_HandleTypeDef *hspi, GPIO_TypeDef *acc_nss_port, uint16_t acc_nss_pin,
                  GPIO_TypeDef *gyro_nss_port, uint16_t gyro_nss_pin) {
     bmi088->hspi = hspi;
     bmi088->acc_nss_port = acc_nss_port;
@@ -95,19 +95,20 @@ void bmi088_init(Bmi088 *bmi088, SPI_HandleTypeDef *hspi, GPIO_TypeDef *acc_nss_
     bmi088->gyro_range = BMI088_GYRO_RANGE_2000DPS;
 }
 
-void bmi088_set_range(Bmi088 *bmi088, Bmi088AccRange acc_range, Bmi088GyroRange gyro_range) {
+void bmi088_set_range(bmi088_t *bmi088, bmi088_acc_range_t acc_range, bmi088_gyro_range_t gyro_range) {
     bmi088_write_acc_reg(bmi088, REG_ACC_RANGE, acc_range);
     bmi088_write_gyro_reg(bmi088, REG_GYRO_RANGE, gyro_range);
     bmi088->acc_range = acc_range;
     bmi088->gyro_range = gyro_range;
 }
 
-void bmi088_set_odr(Bmi088 *bmi088, Bmi088AccOdr acc_odr, Bmi088AccBwp acc_bwp, Bmi088GyroOdrBwp gyro_odr_bwp) {
+void bmi088_set_odr(bmi088_t *bmi088, bmi088_acc_odr_t acc_odr, bmi088_acc_bwp_t acc_bwp,
+                    bmi088_gyro_odr_bwp gyro_odr_bwp) {
     bmi088_write_acc_reg(bmi088, REG_ACC_CONF, acc_bwp | acc_odr);
     bmi088_write_gyro_reg(bmi088, REG_GYRO_BANDWIDTH, gyro_odr_bwp);
 }
 
-void bmi088_read_acc(Bmi088 *bmi088, float *acc) {
+void bmi088_read_acc(bmi088_t *bmi088, float *acc) {
     uint8_t data[6];
     uint16_t x;
 
@@ -119,7 +120,7 @@ void bmi088_read_acc(Bmi088 *bmi088, float *acc) {
     }
 }
 
-void bmi088_read_gyro(Bmi088 *bmi088, float *gyro) {
+void bmi088_read_gyro(bmi088_t *bmi088, float *gyro) {
     uint8_t data[6];
     uint16_t x;
 
@@ -131,7 +132,7 @@ void bmi088_read_gyro(Bmi088 *bmi088, float *gyro) {
     }
 }
 
-static void bmi088_soft_reset_acc(Bmi088 *bmi088) {
+static void bmi088_soft_reset_acc(bmi088_t *bmi088) {
     /* Write to the soft-reset register and wait until the reset value is written properly. */
     bmi088_write_acc_reg(bmi088, REG_ACC_SOFTRESET, ACC_SOFTRESET);
     HAL_Delay(ACC_SOFTRESET_DELAY);
@@ -140,7 +141,7 @@ static void bmi088_soft_reset_acc(Bmi088 *bmi088) {
     bmi088_read_acc_dummy(bmi088);
 }
 
-static void bmi088_power_on(Bmi088 *bmi088) {
+static void bmi088_power_on(bmi088_t *bmi088) {
     /* Acceleromoter. */
     bmi088_write_acc_reg(bmi088, REG_ACC_PWR_CONF, ACC_PWR_SAVE_ACTIVE);
     HAL_Delay(ACC_PWR_ON_DELAY);
@@ -152,12 +153,12 @@ static void bmi088_power_on(Bmi088 *bmi088) {
     HAL_Delay(GYRO_PWR_ON_DELAY);
 }
 
-static void bmi088_read_acc_dummy(Bmi088 *bmi088) {
+static void bmi088_read_acc_dummy(bmi088_t *bmi088) {
     uint8_t data;
     bmi088_read_acc_reg(bmi088, REG_ACC_CHIP_ID, &data, 1U);
 }
 
-static void bmi088_read_acc_reg(Bmi088 *bmi088, uint8_t reg, uint8_t *data, uint16_t size) {
+static void bmi088_read_acc_reg(bmi088_t *bmi088, uint8_t reg, uint8_t *data, uint16_t size) {
     uint8_t tx_buf[1] = {reg | FLAG_READ};
     uint8_t rx_buf[1] = {0};
 
@@ -168,7 +169,7 @@ static void bmi088_read_acc_reg(Bmi088 *bmi088, uint8_t reg, uint8_t *data, uint
     HAL_GPIO_WritePin(bmi088->acc_nss_port, bmi088->acc_nss_pin, GPIO_PIN_SET);
 }
 
-static void bmi088_write_acc_reg(Bmi088 *bmi088, uint8_t reg, uint8_t data) {
+static void bmi088_write_acc_reg(bmi088_t *bmi088, uint8_t reg, uint8_t data) {
     uint8_t tx_buf[2] = {reg, data};
 
     HAL_GPIO_WritePin(bmi088->acc_nss_port, bmi088->acc_nss_pin, GPIO_PIN_RESET);
@@ -176,7 +177,7 @@ static void bmi088_write_acc_reg(Bmi088 *bmi088, uint8_t reg, uint8_t data) {
     HAL_GPIO_WritePin(bmi088->acc_nss_port, bmi088->acc_nss_pin, GPIO_PIN_SET);
 }
 
-static void bmi088_read_gyro_reg(Bmi088 *bmi088, uint8_t reg, uint8_t *data, uint16_t size) {
+static void bmi088_read_gyro_reg(bmi088_t *bmi088, uint8_t reg, uint8_t *data, uint16_t size) {
     uint8_t tx_buf[1] = {reg | FLAG_READ};
 
     HAL_GPIO_WritePin(bmi088->gyro_nss_port, bmi088->gyro_nss_pin, GPIO_PIN_RESET);
@@ -185,7 +186,7 @@ static void bmi088_read_gyro_reg(Bmi088 *bmi088, uint8_t reg, uint8_t *data, uin
     HAL_GPIO_WritePin(bmi088->gyro_nss_port, bmi088->gyro_nss_pin, GPIO_PIN_SET);
 }
 
-static void bmi088_write_gyro_reg(Bmi088 *bmi088, uint8_t reg, uint8_t data) {
+static void bmi088_write_gyro_reg(bmi088_t *bmi088, uint8_t reg, uint8_t data) {
     uint8_t tx_buf[2] = {reg, data};
 
     HAL_GPIO_WritePin(bmi088->gyro_nss_port, bmi088->gyro_nss_pin, GPIO_PIN_RESET);

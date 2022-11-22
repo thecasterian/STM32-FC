@@ -10,7 +10,7 @@ typedef enum {
     BMP280_OSPL_X4  = 3,
     BMP280_OSPL_X8  = 4,
     BMP280_OSPL_X16 = 5,
-} Bmp280Ospl;
+} bmp280_ospl_t;
 
 typedef enum {
     BMP280_STBY_TIME_0_5_MS  = 0,
@@ -21,7 +21,7 @@ typedef enum {
     BMP280_STBY_TIME_1000_MS = 5,
     BMP280_STBY_TIME_2000_MS = 6,
     BMP280_STBY_TIME_4000_MS = 7,
-} Bmp280StbyTime;
+} bmp280_stby_time_t;
 
 typedef enum {
     BMP280_IIR_OFF      = 0,
@@ -29,7 +29,7 @@ typedef enum {
     BMP280_IIR_COEFF_4  = 2,
     BMP280_IIR_COEFF_8  = 3,
     BMP280_IIR_COEFF_16 = 4,
-} Bmp280IirCoeff;
+} bmp280_iir_coeff_t;
 
 typedef struct {
     SPI_HandleTypeDef *hspi;
@@ -51,12 +51,12 @@ typedef struct {
     int64_t dig_p7;
     int64_t dig_p8;
     int64_t dig_p9;
-} Bmp280;
+} bmp280_t;
 
-void bmp280_init(Bmp280 *bmp280, SPI_HandleTypeDef *hspi, GPIO_TypeDef *nss_port, uint16_t nss_pin);
-void bmp280_set_param(Bmp280 *bmp280, Bmp280Ospl pres_ospl, Bmp280Ospl temp_ospl, Bmp280StbyTime stby_time,
-                      Bmp280IirCoeff iir_coeff);
+void bmp280_init(bmp280_t *bmp280, SPI_HandleTypeDef *hspi, GPIO_TypeDef *nss_port, uint16_t nss_pin);
+void bmp280_set_param(bmp280_t *bmp280, bmp280_ospl_t pres_ospl, bmp280_ospl_t temp_ospl, bmp280_stby_time_t stby_time,
+                      bmp280_iir_coeff_t iir_coeff);
 
-void bmp280_read_pres(Bmp280 *bmp280, float *pres);
+void bmp280_read_pres(bmp280_t *bmp280, float *pres);
 
 #endif

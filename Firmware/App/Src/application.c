@@ -8,12 +8,13 @@
 #include "timer.h"
 #include "usbd_cdc_if.h"
 
-static Bmi088 bmi088;
-static Lis2mdl lis2mdl;
-static Bmp280 bmp280;
+static period_timer_t timer;
+static bmi088_t bmi088;
+static lis2mdl_t lis2mdl;
+static bmp280_t bmp280;
 
 void setup(void) {
-    timer_init(&timer_cntl, &htim6);
+    timer_init(&timer, &htim6);
 
     bmi088_init(&bmi088, &hspi1, ACC_NSS_GPIO_Port, ACC_NSS_Pin, GYRO_NSS_GPIO_Port, GYRO_NSS_Pin);
     bmi088_set_range(&bmi088, BMI088_ACC_RANGE_24G, BMI088_GYRO_RANGE_2000DPS);
@@ -30,13 +31,13 @@ void loop(void) {
     float acc_raw[3], gyro_raw[3], mag_raw[3], acc[3], gyro[3], mag[3], pres;
     uint8_t buf[41];
 
-    if (timer_cntl.period_elapsed) {
+    if (timer.period_elapsed) {
         bmi088_read_acc(&bmi088, acc_raw);
         bmi088_read_gyro(&bmi088, gyro_raw);
         lis2mdl_read_mag(&lis2mdl, mag_raw);
         bmp280_read_pres(&bmp280, &pres);
 
-        /* Change axis. */
+        /* Change axes. */
         acc[0] = -acc_raw[0];
         acc[1] = acc_raw[1];
         acc[2] = -acc_raw[2];
@@ -54,7 +55,7 @@ void loop(void) {
         memcpy(&buf[37], &pres, sizeof(pres));
         _write(1, (char *)buf, sizeof(buf));
 
-        timer_cntl.period_elapsed = false;
+        timer.period_elapsed = false;
     }
 }
 
@@ -70,4 +71,10 @@ int _write(int file, char *ptr, int len) {
     }
 
     return res;
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+    if (htim == timer.htim) {
+        period_timer_callback(&timer);
+    }
 }

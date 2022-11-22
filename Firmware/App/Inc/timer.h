@@ -7,10 +7,10 @@
 typedef struct {
     TIM_HandleTypeDef *htim;
     volatile bool period_elapsed;
-} Timer;
+} period_timer_t;
 
-extern Timer timer_cntl, timer_pwm;
+void period_timer_init(period_timer_t *timer, TIM_HandleTypeDef *htim);
 
-void timer_init(Timer *timer, TIM_HandleTypeDef *htim);
+void period_timer_callback(period_timer_t *timer);
 
 #endif

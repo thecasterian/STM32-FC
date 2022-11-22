@@ -26,14 +26,14 @@
 
 #define MASK_IM_UPDATE 0x01
 
-static void bmp280_read_compen_param(Bmp280 *bmp280);
-static void bmp280_compen_temp(Bmp280 *bmp280, int32_t adc_temp, int32_t *t_fine);
-static void bmp280_compen_pres(Bmp280 *bmp280, int32_t adc_pres, int32_t t_fine, float *pres);
+static void bmp280_read_compen_param(bmp280_t *bmp280);
+static void bmp280_compen_temp(bmp280_t *bmp280, int32_t adc_temp, int32_t *t_fine);
+static void bmp280_compen_pres(bmp280_t *bmp280, int32_t adc_pres, int32_t t_fine, float *pres);
 
-static void bmp280_read_reg(Bmp280 *bmp280, uint8_t reg, uint8_t *data, uint16_t size);
-static void bmp280_write_reg(Bmp280 *bmp280, uint8_t reg, uint8_t data);
+static void bmp280_read_reg(bmp280_t *bmp280, uint8_t reg, uint8_t *data, uint16_t size);
+static void bmp280_write_reg(bmp280_t *bmp280, uint8_t reg, uint8_t data);
 
-void bmp280_init(Bmp280 *bmp280, SPI_HandleTypeDef *hspi, GPIO_TypeDef *nss_port, uint16_t nss_pin) {
+void bmp280_init(bmp280_t *bmp280, SPI_HandleTypeDef *hspi, GPIO_TypeDef *nss_port, uint16_t nss_pin) {
     bmp280->hspi = hspi;
     bmp280->nss_port = nss_port;
     bmp280->nss_pin = nss_pin;
@@ -52,8 +52,8 @@ void bmp280_init(Bmp280 *bmp280, SPI_HandleTypeDef *hspi, GPIO_TypeDef *nss_port
     bmp280_read_compen_param(bmp280);
 }
 
-void bmp280_set_param(Bmp280 *bmp280, Bmp280Ospl pres_ospl, Bmp280Ospl temp_ospl, Bmp280StbyTime stby_time,
-                      Bmp280IirCoeff iir_coeff) {
+void bmp280_set_param(bmp280_t *bmp280, bmp280_ospl_t pres_ospl, bmp280_ospl_t temp_ospl, bmp280_stby_time_t stby_time,
+                      bmp280_iir_coeff_t iir_coeff) {
     /* Register "config" must be written in the sleep mode. */
     bmp280_write_reg(bmp280, REG_CTRL_MEAS, SLEEP_MODE);
 
@@ -68,7 +68,7 @@ void bmp280_set_param(Bmp280 *bmp280, Bmp280Ospl pres_ospl, Bmp280Ospl temp_ospl
     }
 }
 
-void bmp280_read_pres(Bmp280 *bmp280, float *pres) {
+void bmp280_read_pres(bmp280_t *bmp280, float *pres) {
     uint8_t data[6];
     uint32_t adc_pres, adc_temp;
     int32_t t_fine;
@@ -84,7 +84,7 @@ void bmp280_read_pres(Bmp280 *bmp280, float *pres) {
     bmp280_compen_pres(bmp280, adc_pres, t_fine, pres);
 }
 
-static void bmp280_read_compen_param(Bmp280 *bmp280) {
+static void bmp280_read_compen_param(bmp280_t *bmp280) {
     uint8_t data[24];
 
     bmp280_read_reg(bmp280, REG_CALIB00, data, sizeof(data));
@@ -103,7 +103,7 @@ static void bmp280_read_compen_param(Bmp280 *bmp280) {
     bmp280->dig_p9 = to_int16(PACK_2(data[23], data[22]));
 }
 
-static void bmp280_compen_temp(Bmp280 *bmp280, int32_t adc_temp, int32_t *t_fine) {
+static void bmp280_compen_temp(bmp280_t *bmp280, int32_t adc_temp, int32_t *t_fine) {
     int32_t var1, var2;
 
     var1 = (((adc_temp >> 3) - (bmp280->dig_t1 << 1)) * bmp280->dig_t2) >> 11;
@@ -112,7 +112,7 @@ static void bmp280_compen_temp(Bmp280 *bmp280, int32_t adc_temp, int32_t *t_fine
     *t_fine = var1 + var2;
 }
 
-static void bmp280_compen_pres(Bmp280 *bmp280, int32_t adc_pres, int32_t t_fine, float *pres) {
+static void bmp280_compen_pres(bmp280_t *bmp280, int32_t adc_pres, int32_t t_fine, float *pres) {
     int64_t var1, var2, p;
 
     var1 = ((int64_t)t_fine) - 128000;
@@ -133,7 +133,7 @@ static void bmp280_compen_pres(Bmp280 *bmp280, int32_t adc_pres, int32_t t_fine,
     }
 }
 
-static void bmp280_read_reg(Bmp280 *bmp280, uint8_t reg, uint8_t *data, uint16_t size) {
+static void bmp280_read_reg(bmp280_t *bmp280, uint8_t reg, uint8_t *data, uint16_t size) {
     uint8_t tx_buf[1] = {reg};
 
     HAL_GPIO_WritePin(bmp280->nss_port, bmp280->nss_pin, GPIO_PIN_RESET);
@@ -142,7 +142,7 @@ static void bmp280_read_reg(Bmp280 *bmp280, uint8_t reg, uint8_t *data, uint16_t
     HAL_GPIO_WritePin(bmp280->nss_port, bmp280->nss_pin, GPIO_PIN_SET);
 }
 
-static void bmp280_write_reg(Bmp280 *bmp280, uint8_t reg, uint8_t data) {
+static void bmp280_write_reg(bmp280_t *bmp280, uint8_t reg, uint8_t data) {
     uint8_t tx_buf[2] = {reg & MASK_WRITE, data};
 
     HAL_GPIO_WritePin(bmp280->nss_port, bmp280->nss_pin, GPIO_PIN_RESET);
