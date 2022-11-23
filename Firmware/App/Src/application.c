@@ -5,16 +5,24 @@
 #include "bmp280.h"
 #include "lis2mdl.h"
 #include "main.h"
+#include "protocol.h"
 #include "timer.h"
+#include "usb_queue.h"
 #include "usbd_cdc_if.h"
 
 static period_timer_t timer;
+static packet_recver_t packet_recver;
+
 static bmi088_t bmi088;
 static lis2mdl_t lis2mdl;
 static bmp280_t bmp280;
 
+float acc_meas[3], gyro_meas[3], mag_meas[3], baro_meas, raw_acc_meas[3], raw_gyro_meas[3], raw_mag_meas[3];
+float kf_rpy[3], kf_acc[3], kf_vel[3], kf_pos[3], acc_rpy[3], baro_height;
+
 void setup(void) {
-    timer_init(&timer, &htim6);
+    period_timer_init(&timer, &htim6);
+    packet_recver_init(&packet_recver);
 
     bmi088_init(&bmi088, &hspi1, ACC_NSS_GPIO_Port, ACC_NSS_Pin, GYRO_NSS_GPIO_Port, GYRO_NSS_Pin);
     bmi088_set_range(&bmi088, BMI088_ACC_RANGE_24G, BMI088_GYRO_RANGE_2000DPS);
@@ -28,34 +36,37 @@ void setup(void) {
 }
 
 void loop(void) {
-    float acc_raw[3], gyro_raw[3], mag_raw[3], acc[3], gyro[3], mag[3], pres;
-    uint8_t buf[41];
+    uint8_t err;
 
     if (timer.period_elapsed) {
-        bmi088_read_acc(&bmi088, acc_raw);
-        bmi088_read_gyro(&bmi088, gyro_raw);
-        lis2mdl_read_mag(&lis2mdl, mag_raw);
-        bmp280_read_pres(&bmp280, &pres);
+        bmi088_read_acc(&bmi088, raw_acc_meas);
+        bmi088_read_gyro(&bmi088, raw_gyro_meas);
+        lis2mdl_read_mag(&lis2mdl, raw_mag_meas);
+        bmp280_read_pres(&bmp280, &baro_meas);
 
         /* Change axes. */
-        acc[0] = -acc_raw[0];
-        acc[1] = acc_raw[1];
-        acc[2] = -acc_raw[2];
-        gyro[0] = -gyro_raw[0];
-        gyro[1] = gyro_raw[1];
-        gyro[2] = -gyro_raw[2];
-        mag[0] = -mag_raw[1];
-        mag[1] = mag_raw[0];
-        mag[2] = -mag_raw[2];
+        acc_meas[0] = -raw_acc_meas[0];
+        acc_meas[1] = raw_acc_meas[1];
+        acc_meas[2] = -raw_acc_meas[2];
+        gyro_meas[0] = -raw_gyro_meas[0];
+        gyro_meas[1] = raw_gyro_meas[1];
+        gyro_meas[2] = -raw_gyro_meas[2];
+        mag_meas[0] = -raw_mag_meas[1];
+        mag_meas[1] = raw_mag_meas[0];
+        mag_meas[2] = -raw_mag_meas[2];
 
-        buf[0] = 0x42;
-        memcpy(&buf[1], acc, sizeof(acc));
-        memcpy(&buf[13], gyro, sizeof(gyro));
-        memcpy(&buf[25], mag, sizeof(mag));
-        memcpy(&buf[37], &pres, sizeof(pres));
-        _write(1, (char *)buf, sizeof(buf));
+        stream_send();
 
         timer.period_elapsed = false;
+    }
+
+    packet_recver_recv(&packet_recver);
+    if (packet_recver.recved) {
+        packet_validate(&packet_recver.packet, &err);
+        if (err == ERR_OK) {
+            command_execute(&packet_recver.packet);
+        }
+        response_send(err);
     }
 }
 
