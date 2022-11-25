@@ -27,7 +27,7 @@
 #define MASK_IM_UPDATE 0x01
 
 static void bmp280_read_compen_param(bmp280_t *bmp280);
-static void bmp280_compen_temp(bmp280_t *bmp280, int32_t adc_temp, int32_t *t_fine);
+static void bmp280_compen_temp(bmp280_t *bmp280, int32_t adc_temp, int32_t *t_fine, float *temp);
 static void bmp280_compen_pres(bmp280_t *bmp280, int32_t adc_pres, int32_t t_fine, float *pres);
 
 static void bmp280_read_reg(bmp280_t *bmp280, uint8_t reg, uint8_t *data, uint16_t size);
@@ -68,7 +68,7 @@ void bmp280_set_param(bmp280_t *bmp280, bmp280_ospl_t pres_ospl, bmp280_ospl_t t
     }
 }
 
-void bmp280_read_pres(bmp280_t *bmp280, float *pres) {
+void bmp280_read_pres_temp(bmp280_t *bmp280, float *pres, float *temp) {
     uint8_t data[6];
     uint32_t adc_pres, adc_temp;
     int32_t t_fine;
@@ -80,7 +80,7 @@ void bmp280_read_pres(bmp280_t *bmp280, float *pres) {
     adc_temp = (((uint32_t)data[3]) << 12) | (data[4] << 4) | (data[5] >> 4);
 
     /* Compensate temperature and pressure. */
-    bmp280_compen_temp(bmp280, adc_temp, &t_fine);
+    bmp280_compen_temp(bmp280, adc_temp, &t_fine, temp);
     bmp280_compen_pres(bmp280, adc_pres, t_fine, pres);
 }
 
@@ -103,13 +103,14 @@ static void bmp280_read_compen_param(bmp280_t *bmp280) {
     bmp280->dig_p9 = to_int16(PACK_2(data[23], data[22]));
 }
 
-static void bmp280_compen_temp(bmp280_t *bmp280, int32_t adc_temp, int32_t *t_fine) {
+static void bmp280_compen_temp(bmp280_t *bmp280, int32_t adc_temp, int32_t *t_fine, float *temp) {
     int32_t var1, var2;
 
     var1 = (((adc_temp >> 3) - (bmp280->dig_t1 << 1)) * bmp280->dig_t2) >> 11;
     var2 = (adc_temp >> 4) - bmp280->dig_t1;
     var2 = (((var2 * var2) >> 12) * bmp280->dig_t3) >> 14;
     *t_fine = var1 + var2;
+    *temp = ((*t_fine) * 5 + 128) >> 8;
 }
 
 static void bmp280_compen_pres(bmp280_t *bmp280, int32_t adc_pres, int32_t t_fine, float *pres) {

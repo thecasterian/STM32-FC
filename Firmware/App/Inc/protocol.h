@@ -28,13 +28,14 @@
 #define ERR_LEN_INVAL 0xE5
 #define ERR_ARG_INVAL 0xE6
 
-#define DAT_ACC_MEAS      0x10
-#define DAT_GYRO_MEAS     0x11
-#define DAT_MAG_MEAS      0x12
-#define DAT_BARO_MEAS     0x13
-#define DAT_RAW_ACC_MEAS  0x14
-#define DAT_RAW_GYRO_MEAS 0x15
-#define DAT_RAW_MAG_MEAS  0x16
+#define DAT_ACC           0x10
+#define DAT_GYRO          0x11
+#define DAT_MAG           0x12
+#define DAT_PRES          0x13
+#define DAT_TEMP          0x14
+#define DAT_RAW_ACC_MEAS  0x15
+#define DAT_RAW_GYRO_MEAS 0x16
+#define DAT_RAW_MAG_MEAS  0x17
 #define DAT_KF_RPY        0x20
 #define DAT_KF_ACC        0x21
 #define DAT_KF_VEL        0x22

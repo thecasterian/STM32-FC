@@ -1,9 +1,13 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+/* Gyro bias. */
 #define GYRO_BIAS_X ( 4.31881460e-03f)
 #define GYRO_BIAS_Y (-3.06885352e-03f)
 #define GYRO_BIAS_Z (-6.71779391e-04f)
+
+/* Heuristic drift reduction increment. */
+#define GYRO_HDR_INC 0.0001f
 
 #define MAG_SOFT_IRON_XX ( 9.94427990e-01f)
 #define MAG_SOFT_IRON_XY ( 1.83568371e-02f)

@@ -12,16 +12,13 @@ mz = data[:, 2]
 # Ellipsoid fit
 def func(param, mx, my, mz):
     Axx, Axy, Axz, Ayy, Ayz, Azz, Vx, Vy, Vz = param
-    res = []
 
-    for mxx, myy, mzz in zip(mx, my, mz):
-        x = np.array([mxx - Vx, myy - Vy, mzz - Vz])
-        A = np.array([[Axx, Axy, Axz], [Axy, Ayy, Ayz], [Axz, Ayz, Azz]])
-        res.append(x.T @ A @ x - 1)
+    x = np.array([mx - Vx, my - Vy, mz - Vz])
+    A = np.array([[Axx, Axy, Axz], [Axy, Ayy, Ayz], [Axz, Ayz, Azz]])
+    return x.T @ A @ x - 1
 
-    return np.array(res)
-
-plsq = leastsq(func, [1, 0, 0, 1, 0, 1, 0, 0, 0], args=(mx, my, mz))
+f = np.vectorize(func, excluded=[0])
+plsq = leastsq(f, [1, 0, 0, 1, 0, 1, 0, 0, 0], args=(mx, my, mz))
 
 # Calculate calibration
 Axx, Axy, Axz, Ayy, Ayz, Azz, Vx, Vy, Vz = plsq[0]

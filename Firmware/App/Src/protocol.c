@@ -15,10 +15,11 @@ static const struct {
     float *dat;
     uint8_t size;
 } strm_dat_list[DAT_NUM] = {
-    [DAT_ACC_MEAS]      = { .dat = acc_meas,      .size = 12U },
-    [DAT_GYRO_MEAS]     = { .dat = gyro_meas,     .size = 12U },
-    [DAT_MAG_MEAS]      = { .dat = mag_meas,      .size = 12U },
-    [DAT_BARO_MEAS]     = { .dat = &baro_meas,    .size = 4U  },
+    [DAT_ACC]           = { .dat = acc,           .size = 12U },
+    [DAT_GYRO]          = { .dat = gyro,          .size = 12U },
+    [DAT_MAG]           = { .dat = mag,           .size = 12U },
+    [DAT_PRES]          = { .dat = &pres,         .size = 4U  },
+    [DAT_TEMP]          = { .dat = &temp,         .size = 4U  },
     [DAT_RAW_ACC_MEAS]  = { .dat = raw_acc_meas,  .size = 12U },
     [DAT_RAW_GYRO_MEAS] = { .dat = raw_gyro_meas, .size = 12U },
     [DAT_RAW_MAG_MEAS]  = { .dat = raw_mag_meas,  .size = 12U },
@@ -104,6 +105,7 @@ void packet_recver_recv(packet_recver_t *packet_recver) {
 void packet_validate(packet_t *packet, uint8_t *err) {
     uint8_t cks;
     bool valid;
+    uint16_t strm_len;
 
     *err = ERR_OK;
     calc_checksum(packet->dat, packet->len, &cks);
@@ -130,6 +132,7 @@ void packet_validate(packet_t *packet, uint8_t *err) {
             break;
         case CMD_STRM_DAT:
             /* Variable length; no need to validate length. */
+            strm_len = 0U;
             for (uint8_t i = 1U; i < packet->len; i++) {
                 validate_data_id(packet->dat[i], &valid);
                 if (!valid) {
@@ -137,6 +140,11 @@ void packet_validate(packet_t *packet, uint8_t *err) {
                     *err = ERR_ARG_INVAL;
                     break;
                 }
+                strm_len += strm_dat_list[packet->dat[i]].size;
+            }
+            if (strm_len > PROTOCOL_LEN_MAX) {
+                /* Streaming data is too large. */
+                *err = ERR_ARG_INVAL;
             }
             break;
         default:
@@ -217,10 +225,11 @@ static void calc_checksum(const uint8_t *buf, uint8_t size, uint8_t *checksum) {
 
 static void validate_data_id(uint8_t id, bool *valid) {
     switch (id) {
-    case DAT_ACC_MEAS:
-    case DAT_GYRO_MEAS:
-    case DAT_MAG_MEAS:
-    case DAT_BARO_MEAS:
+    case DAT_ACC:
+    case DAT_GYRO:
+    case DAT_MAG:
+    case DAT_PRES:
+    case DAT_TEMP:
     case DAT_RAW_ACC_MEAS:
     case DAT_RAW_GYRO_MEAS:
     case DAT_RAW_MAG_MEAS:

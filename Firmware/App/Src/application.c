@@ -3,6 +3,7 @@
 #include "application.h"
 #include "bmi088.h"
 #include "bmp280.h"
+#include "calib.h"
 #include "lis2mdl.h"
 #include "main.h"
 #include "protocol.h"
@@ -17,8 +18,10 @@ static bmi088_t bmi088;
 static lis2mdl_t lis2mdl;
 static bmp280_t bmp280;
 
-float acc_meas[3], gyro_meas[3], mag_meas[3], baro_meas, raw_acc_meas[3], raw_gyro_meas[3], raw_mag_meas[3];
+float acc[3], gyro[3], mag[3], pres, temp, raw_acc_meas[3], raw_gyro_meas[3], raw_mag_meas[3];
 float kf_rpy[3], kf_acc[3], kf_vel[3], kf_pos[3], acc_rpy[3], baro_height;
+
+static float acc_ss_frm[3], gyro_ss_frm[3], mag_ss_frm[3];
 
 void setup(void) {
     period_timer_init(&timer, &htim6);
@@ -32,7 +35,7 @@ void setup(void) {
     lis2mdl_set_odr(&lis2mdl, LIS2MDL_ODR_100Hz);
 
     bmp280_init(&bmp280, &hspi1, BARO_NSS_GPIO_Port, BARO_NSS_Pin);
-    bmp280_set_param(&bmp280, BMP280_OSPL_X16, BMP280_OSPL_X2, BMP280_STBY_TIME_0_5_MS, BMP280_IIR_COEFF_16);
+    bmp280_set_param(&bmp280, BMP280_OSPL_X16, BMP280_OSPL_X2, BMP280_STBY_TIME_0_5_MS, BMP280_IIR_OFF);
 }
 
 void loop(void) {
@@ -42,18 +45,23 @@ void loop(void) {
         bmi088_read_acc(&bmi088, raw_acc_meas);
         bmi088_read_gyro(&bmi088, raw_gyro_meas);
         lis2mdl_read_mag(&lis2mdl, raw_mag_meas);
-        bmp280_read_pres(&bmp280, &baro_meas);
+        bmp280_read_pres_temp(&bmp280, &pres, &temp);
 
-        /* Change axes. */
-        acc_meas[0] = -raw_acc_meas[0];
-        acc_meas[1] = raw_acc_meas[1];
-        acc_meas[2] = -raw_acc_meas[2];
-        gyro_meas[0] = -raw_gyro_meas[0];
-        gyro_meas[1] = raw_gyro_meas[1];
-        gyro_meas[2] = -raw_gyro_meas[2];
-        mag_meas[0] = -raw_mag_meas[1];
-        mag_meas[1] = raw_mag_meas[0];
-        mag_meas[2] = -raw_mag_meas[2];
+        /* Calibrate. */
+        calib_acc(raw_acc_meas, acc_ss_frm);
+        calib_gyro(raw_gyro_meas, gyro_ss_frm);
+        calib_mag(raw_mag_meas, mag_ss_frm);
+
+        /* Change axes from the sensor frame to the FC frame. */
+        acc[0] = -acc_ss_frm[0];
+        acc[1] = acc_ss_frm[1];
+        acc[2] = -acc_ss_frm[2];
+        gyro[0] = -gyro_ss_frm[0];
+        gyro[1] = gyro_ss_frm[1];
+        gyro[2] = -gyro_ss_frm[2];
+        mag[0] = -mag_ss_frm[1];
+        mag[1] = mag_ss_frm[0];
+        mag[2] = -mag_ss_frm[2];
 
         stream_send();
 

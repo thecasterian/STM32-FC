@@ -1,4 +1,3 @@
-#include "config.h"
 #include "lis2mdl.h"
 #include "util.h"
 
@@ -19,17 +18,6 @@
 #define MD_CONT      0x00
 
 #define SENSITIVITY 1.5f                        /* mG / LSB */
-
-static const float magcal_a[3][3] = {
-    {MAG_SOFT_IRON_XX, MAG_SOFT_IRON_XY, MAG_SOFT_IRON_XZ},
-    {MAG_SOFT_IRON_XY, MAG_SOFT_IRON_YY, MAG_SOFT_IRON_YZ},
-    {MAG_SOFT_IRON_XZ, MAG_SOFT_IRON_YZ, MAG_SOFT_IRON_ZZ},
-};
-static const float magcal_b[3] = {
-    MAG_HARD_IRON_X,
-    MAG_HARD_IRON_Y,
-    MAG_HARD_IRON_Z,
-};
 
 static void lis2mdl_read_reg(lis2mdl_t *lis2mdl, uint8_t reg, uint8_t *data, uint16_t size);
 static void lis2mdl_write_reg(lis2mdl_t *lis2mdl, uint8_t reg, uint8_t data);
@@ -60,22 +48,13 @@ void lis2mdl_set_odr(lis2mdl_t *lis2mdl, lis2mdl_odr_t odr) {
 void lis2mdl_read_mag(lis2mdl_t *lis2mdl, float *mag) {
     uint8_t data[6];
     uint16_t x;
-    float uncal[3];
 
     lis2mdl_read_reg(lis2mdl, REG_OUTX_L, data, sizeof(data));
 
-    /* Read uncalibrated magnetic field. */
+    /* Read magnetic field. */
     for (int16_t i = 0; i < 3; i++) {
         x = PACK_2(data[2 * i + 1], data[2 * i]);
-        uncal[i] = to_int16(x) * SENSITIVITY;
-    }
-
-    /* Calibrate soft- and hard-iron effect. */
-    for (int16_t i = 0; i < 3; i++) {
-        mag[i] = 0.0f;
-        for (int16_t j = 0; j < 3; j++) {
-            mag[i] += magcal_a[i][j] * (uncal[j] - magcal_b[j]);
-        }
+        mag[i] = to_int16(x) * SENSITIVITY;
     }
 }
 

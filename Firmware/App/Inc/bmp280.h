@@ -57,6 +57,6 @@ void bmp280_init(bmp280_t *bmp280, SPI_HandleTypeDef *hspi, GPIO_TypeDef *nss_po
 void bmp280_set_param(bmp280_t *bmp280, bmp280_ospl_t pres_ospl, bmp280_ospl_t temp_ospl, bmp280_stby_time_t stby_time,
                       bmp280_iir_coeff_t iir_coeff);
 
-void bmp280_read_pres(bmp280_t *bmp280, float *pres);
+void bmp280_read_pres_temp(bmp280_t *bmp280, float *pres, float *temp);
 
 #endif

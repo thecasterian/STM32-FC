@@ -1,5 +1,4 @@
 #include "bmi088.h"
-#include "config.h"
 #include "const.h"
 #include "util.h"
 
@@ -45,12 +44,6 @@ static const float gyro_range[5] = {
     [BMI088_GYRO_RANGE_500DPS]  = 500.f,
     [BMI088_GYRO_RANGE_250DPS]  = 250.f,
     [BMI088_GYRO_RANGE_125DPS]  = 125.f,
-};
-
-static const float gyro_bias[3] = {
-    GYRO_BIAS_X,
-    GYRO_BIAS_Y,
-    GYRO_BIAS_Z,
 };
 
 static void bmi088_soft_reset_acc(bmi088_t *bmi088);
@@ -128,7 +121,7 @@ void bmi088_read_gyro(bmi088_t *bmi088, float *gyro) {
 
     for (int16_t i = 0; i < 3; i++) {
         x = PACK_2(data[2 * i + 1], data[2 * i]);
-        gyro[i] = (to_int16(x) / 32767.f * gyro_range[bmi088->gyro_range] * DEG_TO_RAD) - gyro_bias[i];
+        gyro[i] = to_int16(x) / 32767.f * gyro_range[bmi088->gyro_range] * DEG_TO_RAD;
     }
 }
 
