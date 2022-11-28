@@ -6,3 +6,5 @@
 Debug/
 Release/
 STM32-FC-backups/
+Document/html/
+!Doxyfile

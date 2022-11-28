@@ -25,7 +25,7 @@ void setup(void) {
 
     bmi088_init(&bmi088, &hspi1, ACC_NSS_GPIO_Port, ACC_NSS_Pin, GYRO_NSS_GPIO_Port, GYRO_NSS_Pin);
     bmi088_set_range(&bmi088, BMI088_ACC_RANGE_24G, BMI088_GYRO_RANGE_2000DPS);
-    bmi088_set_odr(&bmi088, BMI088_ACC_ODR_1600HZ, BMI088_ACC_BWP_NORMAL, BMI088_GYRO_ODR_1000HZ_BWP_116HZ);
+    bmi088_set_odr_bwp(&bmi088, BMI088_ACC_ODR_1600HZ, BMI088_ACC_BWP_NORMAL, BMI088_GYRO_ODR_1000HZ_BWP_116HZ);
 
     lis2mdl_init(&lis2mdl, &hspi1, MAG_NSS_GPIO_Port, MAG_NSS_Pin);
     lis2mdl_set_odr(&lis2mdl, LIS2MDL_ODR_100Hz);

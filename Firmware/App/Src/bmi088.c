@@ -95,13 +95,13 @@ void bmi088_set_range(bmi088_t *bmi088, bmi088_acc_range_t acc_range, bmi088_gyr
     bmi088->gyro_range = gyro_range;
 }
 
-void bmi088_set_odr(bmi088_t *bmi088, bmi088_acc_odr_t acc_odr, bmi088_acc_bwp_t acc_bwp,
-                    bmi088_gyro_odr_bwp gyro_odr_bwp) {
+void bmi088_set_odr_bwp(bmi088_t *bmi088, bmi088_acc_odr_t acc_odr, bmi088_acc_bwp_t acc_bwp,
+                        bmi088_gyro_odr_bwp gyro_odr_bwp) {
     bmi088_write_acc_reg(bmi088, REG_ACC_CONF, acc_bwp | acc_odr);
     bmi088_write_gyro_reg(bmi088, REG_GYRO_BANDWIDTH, gyro_odr_bwp);
 }
 
-void bmi088_read_acc(bmi088_t *bmi088, float *acc) {
+void bmi088_read_acc(bmi088_t *bmi088, float acc[3]) {
     uint8_t data[6];
     uint16_t x;
 
@@ -113,7 +113,7 @@ void bmi088_read_acc(bmi088_t *bmi088, float *acc) {
     }
 }
 
-void bmi088_read_gyro(bmi088_t *bmi088, float *gyro) {
+void bmi088_read_gyro(bmi088_t *bmi088, float ang[3]) {
     uint8_t data[6];
     uint16_t x;
 
@@ -121,7 +121,7 @@ void bmi088_read_gyro(bmi088_t *bmi088, float *gyro) {
 
     for (int16_t i = 0; i < 3; i++) {
         x = PACK_2(data[2 * i + 1], data[2 * i]);
-        gyro[i] = to_int16(x) / 32767.f * gyro_range[bmi088->gyro_range] * DEG_TO_RAD;
+        ang[i] = to_int16(x) / 32767.f * gyro_range[bmi088->gyro_range] * DEG_TO_RAD;
     }
 }
 
