@@ -2,6 +2,7 @@
 #include "application.h"
 #include "gpio.h"
 #include "protocol.h"
+#include "streaming_data.h"
 #include "usb_queue.h"
 #include "usbd_cdc_if.h"
 
@@ -15,20 +16,22 @@ static const struct {
     float *dat;
     uint8_t size;
 } strm_dat_list[DAT_NUM] = {
-    [DAT_ACC]           = { .dat = acc,           .size = 12U },
-    [DAT_GYRO]          = { .dat = gyro,          .size = 12U },
-    [DAT_MAG]           = { .dat = mag,           .size = 12U },
-    [DAT_PRES]          = { .dat = &pres,         .size = 4U  },
-    [DAT_TEMP]          = { .dat = &temp,         .size = 4U  },
-    [DAT_RAW_ACC_MEAS]  = { .dat = raw_acc_meas,  .size = 12U },
-    [DAT_RAW_GYRO_MEAS] = { .dat = raw_gyro_meas, .size = 12U },
-    [DAT_RAW_MAG_MEAS]  = { .dat = raw_mag_meas,  .size = 12U },
-    [DAT_KF_RPY]        = { .dat = kf_rpy,        .size = 12U },
-    [DAT_KF_ACC]        = { .dat = kf_acc,        .size = 12U },
-    [DAT_KF_VEL]        = { .dat = kf_vel,        .size = 12U },
-    [DAT_KF_POS]        = { .dat = kf_pos,        .size = 12U },
-    [DAT_ACC_RPY]       = { .dat = acc_rpy,       .size = 12U },
-    [DAT_BARO_HEIGHT]   = { .dat = &baro_height,  .size = 4U  },
+    [DAT_ACC]          = { .dat = acc,          .size = 12U },
+    [DAT_ANG]          = { .dat = ang,          .size = 12U },
+    [DAT_MAG]          = { .dat = mag,          .size = 12U },
+    [DAT_PRES]         = { .dat = &pres,        .size = 4U  },
+    [DAT_TEMP]         = { .dat = &temp,        .size = 4U  },
+    [DAT_RAW_ACC]      = { .dat = acc_raw,      .size = 12U },
+    [DAT_RAW_GYRO]     = { .dat = ang_raw,      .size = 12U },
+    [DAT_RAW_MAG]      = { .dat = mag_raw,      .size = 12U },
+    [DAT_KF_QUAT]      = { .dat = &q.w,         .size = 16U },
+    [DAT_KF_RPY]       = { .dat = rpy,          .size = 12U },
+    [DAT_KF_VEL]       = { .dat = vel,          .size = 12U },
+    [DAT_KF_POS]       = { .dat = pos,          .size = 12U },
+    [DAT_EXT_ACC]      = { .dat = acc_ext,      .size = 12U },
+    [DAT_ACC_MAG_QUAT] = { .dat = &q_acc_mag.w, .size = 16U },
+    [DAT_ACC_MAG_RPY]  = { .dat = rpy_acc_mag,  .size = 12U },
+    [DAT_BARO_HEIGHT]  = { .dat = &baro_height, .size = 4U  },
 };
 
 static void calc_checksum(const uint8_t *buf, uint8_t size, uint8_t *checksum);
@@ -226,18 +229,20 @@ static void calc_checksum(const uint8_t *buf, uint8_t size, uint8_t *checksum) {
 static void validate_data_id(uint8_t id, bool *valid) {
     switch (id) {
     case DAT_ACC:
-    case DAT_GYRO:
+    case DAT_ANG:
     case DAT_MAG:
     case DAT_PRES:
     case DAT_TEMP:
-    case DAT_RAW_ACC_MEAS:
-    case DAT_RAW_GYRO_MEAS:
-    case DAT_RAW_MAG_MEAS:
+    case DAT_RAW_ACC:
+    case DAT_RAW_GYRO:
+    case DAT_RAW_MAG:
+    case DAT_KF_QUAT:
     case DAT_KF_RPY:
-    case DAT_KF_ACC:
     case DAT_KF_VEL:
     case DAT_KF_POS:
-    case DAT_ACC_RPY:
+    case DAT_EXT_ACC:
+    case DAT_ACC_MAG_QUAT:
+    case DAT_ACC_MAG_RPY:
     case DAT_BARO_HEIGHT:
         *valid = true;
         break;

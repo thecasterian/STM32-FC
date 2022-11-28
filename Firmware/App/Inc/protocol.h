@@ -28,22 +28,24 @@
 #define ERR_LEN_INVAL 0xE5
 #define ERR_ARG_INVAL 0xE6
 
-#define DAT_ACC           0x10
-#define DAT_GYRO          0x11
-#define DAT_MAG           0x12
-#define DAT_PRES          0x13
-#define DAT_TEMP          0x14
-#define DAT_RAW_ACC_MEAS  0x15
-#define DAT_RAW_GYRO_MEAS 0x16
-#define DAT_RAW_MAG_MEAS  0x17
-#define DAT_KF_RPY        0x20
-#define DAT_KF_ACC        0x21
-#define DAT_KF_VEL        0x22
-#define DAT_KF_POS        0x23
-#define DAT_ACC_RPY       0x24
-#define DAT_BARO_HEIGHT   0x25
+#define DAT_ACC          0x00
+#define DAT_ANG          0x01
+#define DAT_MAG          0x02
+#define DAT_PRES         0x03
+#define DAT_TEMP         0x04
+#define DAT_RAW_ACC      0x05
+#define DAT_RAW_GYRO     0x06
+#define DAT_RAW_MAG      0x07
+#define DAT_KF_QUAT      0x10
+#define DAT_KF_RPY       0x11
+#define DAT_KF_VEL       0x12
+#define DAT_KF_POS       0x13
+#define DAT_EXT_ACC      0x14
+#define DAT_ACC_MAG_QUAT 0x15
+#define DAT_ACC_MAG_RPY  0x16
+#define DAT_BARO_HEIGHT  0x17
 
-#define DAT_NUM 0x26
+#define DAT_NUM 0x18
 
 #define PROTOCOL_LEN_MAX 255
 

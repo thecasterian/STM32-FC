@@ -7,6 +7,7 @@
 #include "lis2mdl.h"
 #include "main.h"
 #include "protocol.h"
+#include "streaming_data.h"
 #include "timer.h"
 #include "usb_queue.h"
 #include "usbd_cdc_if.h"
@@ -17,11 +18,6 @@ static packet_recver_t packet_recver;
 static bmi088_t bmi088;
 static lis2mdl_t lis2mdl;
 static bmp280_t bmp280;
-
-float acc[3], gyro[3], mag[3], pres, temp, raw_acc_meas[3], raw_gyro_meas[3], raw_mag_meas[3];
-float kf_rpy[3], kf_acc[3], kf_vel[3], kf_pos[3], acc_rpy[3], baro_height;
-
-static float acc_ss_frm[3], gyro_ss_frm[3], mag_ss_frm[3];
 
 void setup(void) {
     period_timer_init(&timer, &htim6);
@@ -39,26 +35,27 @@ void setup(void) {
 }
 
 void loop(void) {
+    float acc_ss_frm[3], ang_ss_frm[3], mag_ss_frm[3];
     uint8_t err;
 
     if (timer.period_elapsed) {
-        bmi088_read_acc(&bmi088, raw_acc_meas);
-        bmi088_read_gyro(&bmi088, raw_gyro_meas);
-        lis2mdl_read_mag(&lis2mdl, raw_mag_meas);
+        bmi088_read_acc(&bmi088, acc_raw);
+        bmi088_read_gyro(&bmi088, ang_raw);
+        lis2mdl_read_mag(&lis2mdl, mag_raw);
         bmp280_read_pres_temp(&bmp280, &pres, &temp);
 
         /* Calibrate. */
-        calib_acc(raw_acc_meas, acc_ss_frm);
-        calib_gyro(raw_gyro_meas, gyro_ss_frm);
-        calib_mag(raw_mag_meas, mag_ss_frm);
+        calib_acc(acc_raw, acc_ss_frm);
+        calib_gyro(ang_raw, ang_ss_frm);
+        calib_mag(mag_raw, mag_ss_frm);
 
         /* Change axes from the sensor frame to the FC frame. */
         acc[0] = -acc_ss_frm[0];
         acc[1] = acc_ss_frm[1];
         acc[2] = -acc_ss_frm[2];
-        gyro[0] = -gyro_ss_frm[0];
-        gyro[1] = gyro_ss_frm[1];
-        gyro[2] = -gyro_ss_frm[2];
+        ang[0] = -ang_ss_frm[0];
+        ang[1] = ang_ss_frm[1];
+        ang[2] = -ang_ss_frm[2];
         mag[0] = -mag_ss_frm[1];
         mag[1] = mag_ss_frm[0];
         mag[2] = -mag_ss_frm[2];
