@@ -1,10 +1,12 @@
 *
 !*/
 !*.*
+.pio
 .settings
 .vscode
 Debug/
 Release/
 STM32-FC-backups/
 Document/html/
+!Makefile
 !Doxyfile

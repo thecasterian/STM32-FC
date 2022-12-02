@@ -1,0 +1,24 @@
+{
+    "build": {
+        "core": "stm32",
+        "cpu": "cortex-m4",
+        "f_cpu": "168000000L",
+        "mcu": "stm32f405rgt6"
+    },
+    "debug": {
+        "jlink_device": "STM32F405RG",
+        "openocd_target": "stm32f4x",
+        "svd_path": "STM32F40x.svd"
+    },
+    "name": "STM32-FC",
+    "upload": {
+        "maximum_ram_size": 131072,
+        "maximum_size": 524288,
+        "protocol": "stlink",
+        "protocols": [
+            "stlink"
+        ]
+    },
+    "url": "https://casterian.net",
+    "vendor": "thecasterian"
+}
