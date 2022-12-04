@@ -2,9 +2,16 @@
 #include "application.h"
 #include "gpio.h"
 #include "protocol.h"
+#include "ring_buffer.h"
 #include "streaming_data.h"
-#include "usb_queue.h"
 #include "usbd_cdc_if.h"
+
+static struct {
+    packet_t packet;                                        /* Received packet. */
+
+    bool stx;                                               /* Is STX found? */
+    uint16_t cnt;                                           /* Number of received bytes. */
+} packet_receiver;
 
 /* Is streaming enabled? */
 static bool strm_en;
@@ -34,27 +41,19 @@ static const struct {
     [DAT_BARO_HEIGHT]  = { .dat = &baro_height, .size = 4U  },
 };
 
-static void calc_checksum(const uint8_t *buf, uint8_t size, uint8_t *checksum);
-static void validate_data_id(uint8_t id, bool *valid);
+static uint8_t calc_checksum(const uint8_t *buf, uint8_t size);
 
-void packet_recver_init(packet_recver_t *packet_recver) {
-    packet_recver->recved = false;
-    memset(&packet_recver->packet, 0, sizeof(packet_recver->packet));
-
-    packet_recver->stx = false;
-    packet_recver->cnt = 0U;
-}
-
-void packet_recver_recv(packet_recver_t *packet_recver) {
+bool packet_receive(packet_t *packet) {
     uint8_t c;
+    bool res;
     bool success;
 
-    packet_recver->recved = false;
+    res = false;
 
-    if (!packet_recver->stx) {
+    if (!packet_receiver.stx) {
         /* Find STX. */
         while (true) {
-            usb_queue_pop(&usb_queue, &c, 1U, &success);
+            success = usb_ringbuf_pop(&c, 1U);
             if (!success || (c == STX)) {
                 break;
             }
@@ -62,125 +61,70 @@ void packet_recver_recv(packet_recver_t *packet_recver) {
 
         if (success && (c == STX)) {
             /* STX is found. */
-            packet_recver->stx = true;
-            packet_recver->cnt++;
+            packet_receiver.stx = true;
+            packet_receiver.cnt++;
         } else {
-            packet_recver->stx = false;
-            packet_recver->cnt = 0U;
+            packet_receiver.stx = false;
+            packet_receiver.cnt = 0U;
         }
     }
 
-    if (packet_recver->stx) {
+    if (packet_receiver.stx) {
         while (true) {
-            usb_queue_pop(&usb_queue, &c, 1U, &success);
+            success = usb_ringbuf_pop(&c, 1U);
             if (!success) {
                 break;
             }
 
-            if (packet_recver->cnt == 1U) {
+            if (packet_receiver.cnt == 1U) {
                 /* Byte 1 is TYP. */
-                packet_recver->packet.typ = c;
-            } else if (packet_recver->cnt == 2U) {
+                packet_receiver.packet.typ = c;
+            } else if (packet_receiver.cnt == 2U) {
                 /* Byte 2 is LEN. */
-                packet_recver->packet.len = c;
-            } else if (packet_recver->cnt < (packet_recver->packet.len + 3U)) {
+                packet_receiver.packet.len = c;
+            } else if (packet_receiver.cnt < (packet_receiver.packet.len + 3U)) {
                 /* Byte 3 .. (LEN + 2) are in DAT. */
-                packet_recver->packet.dat[packet_recver->cnt - 3U] = c;
-            } else if (packet_recver->cnt == (packet_recver->packet.len + 3U)) {
+                packet_receiver.packet.dat[packet_receiver.cnt - 3U] = c;
+            } else if (packet_receiver.cnt == (packet_receiver.packet.len + 3U)) {
                 /* Byte (LEN + 3) is CKS. */
-                packet_recver->packet.cks = c;
+                packet_receiver.packet.cks = c;
             } else {
                 /* Last byte is ETX. */
-                packet_recver->packet.etx = c;
+                packet_receiver.packet.etx = c;
 
-                packet_recver->recved = true;
-                packet_recver->stx = false;
-                packet_recver->cnt = 0U;
+                res = true;
+                packet_receiver.stx = false;
+                packet_receiver.cnt = 0U;
+
+                /* Copy packet. */
+                memcpy(packet, &packet_receiver.packet, sizeof(packet_t));
 
                 break;
             }
 
-            packet_recver->cnt++;
+            packet_receiver.cnt++;
         }
     }
+
+    return res;
 }
 
-void packet_validate(packet_t *packet, uint8_t *err) {
-    uint8_t cks;
-    bool valid;
-    uint16_t strm_len;
+uint8_t command_execute(packet_t *packet) {
+    uint8_t err;
 
-    *err = ERR_OK;
-    calc_checksum(packet->dat, packet->len, &cks);
-
+    /* Is the packet valid? */
     if (packet->etx != ETX) {
-        *err = ERR_ETX_MIS;
-    } else if (cks != packet->cks) {
-        *err = ERR_CKS_MIS;
+        err = ERR_ETX_MIS;
+    } else if (calc_checksum(packet->dat, packet->len) != packet->cks) {
+        err = ERR_CKS_MIS;
     } else if (packet->typ != TYP_CMD) {
-        *err = ERR_TYP_INVAL;
+        err = ERR_TYP_INVAL;
     } else {
-        switch (packet->dat[0]) {
-        case CMD_LED_RED:
-        case CMD_LED_GREEN:
-        case CMD_LED_BLUE:
-        case CMD_STRM:
-            if (packet->len != 2U) {
-                /* Length of ARG is not 1 byte. */
-                *err = ERR_LEN_INVAL;
-            } else if (packet->dat[1] > 1U) {
-                /* Argument is not 0 nor 1. */
-                *err = ERR_ARG_INVAL;
-            }
-            break;
-        case CMD_STRM_DAT:
-            /* Variable length; no need to validate length. */
-            strm_len = 0U;
-            for (uint8_t i = 1U; i < packet->len; i++) {
-                validate_data_id(packet->dat[i], &valid);
-                if (!valid) {
-                    /* Streaming data ID is invalid. */
-                    *err = ERR_ARG_INVAL;
-                    break;
-                }
-                strm_len += strm_dat_list[packet->dat[i]].size;
-            }
-            if (strm_len > PROTOCOL_LEN_MAX) {
-                /* Streaming data is too large. */
-                *err = ERR_ARG_INVAL;
-            }
-            break;
-        default:
-            *err = ERR_CMD_INVAL;
-            break;
-        }
+        // TODO: execute command.
+        err = ERR_OK;
     }
-}
 
-void command_execute(packet_t *packet) {
-    switch (packet->dat[0]) {
-    case CMD_LED_RED:
-        HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, packet->dat[1] == 1U ? GPIO_PIN_SET : GPIO_PIN_RESET);
-        break;
-    case CMD_LED_GREEN:
-        HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, packet->dat[1] == 1U ? GPIO_PIN_SET : GPIO_PIN_RESET);
-        break;
-    case CMD_LED_BLUE:
-        HAL_GPIO_WritePin(LED_BLUE_GPIO_Port, LED_BLUE_Pin, packet->dat[1] == 1U ? GPIO_PIN_SET : GPIO_PIN_RESET);
-        break;
-    case CMD_STRM_DAT:
-        memset(strm_dat_sel, 0, sizeof(strm_dat_sel));
-        for (uint8_t i = 1U; i < packet->len; i++) {
-            strm_dat_sel[packet->dat[i]] = true;
-        }
-        break;
-    case CMD_STRM:
-        strm_en = packet->dat[1] == 1U ? true : false;
-        break;
-    default:
-        /* Do nothing. */
-        break;
-    }
+    return err;
 }
 
 void response_send(uint8_t err) {
@@ -191,7 +135,7 @@ void response_send(uint8_t err) {
     buf[2] = 2U;
     buf[3] = err == ERR_OK ? ACK : NACK;
     buf[4] = err;
-    calc_checksum(&buf[3], 2U, &buf[5]);
+    buf[5] = calc_checksum(&buf[3], 2U);
     buf[6] = ETX;
 
     CDC_Transmit_FS(buf, sizeof(buf));
@@ -212,42 +156,20 @@ void stream_send(void) {
             }
         }
 
-        calc_checksum(&buf[3], buf[2], &buf[buf[2] + 3U]);
+        buf[buf[2] + 3U] = calc_checksum(&buf[3], buf[2]);
         buf[buf[2] + 4U] = ETX;
 
         CDC_Transmit_FS(buf, buf[2] + 5U);
     }
 }
 
-static void calc_checksum(const uint8_t *buf, uint8_t size, uint8_t *checksum) {
-    *checksum = 0U;
-    for (uint16_t i = 0U; i < size; i++) {
-        *checksum += buf[i];
-    }
-}
+static uint8_t calc_checksum(const uint8_t *buf, uint8_t size) {
+    uint8_t checksum;
 
-static void validate_data_id(uint8_t id, bool *valid) {
-    switch (id) {
-    case DAT_ACC:
-    case DAT_ANG:
-    case DAT_MAG:
-    case DAT_PRES:
-    case DAT_TEMP:
-    case DAT_RAW_ACC:
-    case DAT_RAW_GYRO:
-    case DAT_RAW_MAG:
-    case DAT_KF_QUAT:
-    case DAT_KF_RPY:
-    case DAT_KF_VEL:
-    case DAT_KF_POS:
-    case DAT_EXT_ACC:
-    case DAT_ACC_MAG_QUAT:
-    case DAT_ACC_MAG_RPY:
-    case DAT_BARO_HEIGHT:
-        *valid = true;
-        break;
-    default:
-        *valid = false;
-        break;
+    checksum = 0U;
+    for (uint16_t i = 0U; i < size; i++) {
+        checksum += buf[i];
     }
+
+    return checksum;
 }

@@ -8,5 +8,6 @@ Debug/
 Release/
 STM32-FC-backups/
 Document/html/
+ceedling_build/
 !Makefile
 !Doxyfile

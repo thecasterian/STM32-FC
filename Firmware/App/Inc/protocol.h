@@ -57,19 +57,9 @@ typedef struct {
     uint8_t etx;                                /* ETX. */
 } packet_t;
 
-typedef struct {
-    bool recved;                                            /* Is whole packet received? */
-    packet_t packet;                                        /* Received packet. */
+bool packet_receive(packet_t *packet);
 
-    bool stx;                                               /* Is STX found? */
-    uint16_t cnt;                                           /* Number of received bytes. */
-} packet_recver_t;
-
-void packet_recver_init(packet_recver_t *packet_recver);
-void packet_recver_recv(packet_recver_t *packet_recver);
-
-void packet_validate(packet_t *packet, uint8_t *err);
-void command_execute(packet_t *packet);
+uint8_t command_execute(packet_t *packet);
 void response_send(uint8_t err);
 void stream_send(void);
 

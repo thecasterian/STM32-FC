@@ -9,6 +9,13 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
+#define GYRO_HSPI hspi1
+#define ACC_HSPI hspi1
+#define MAG_HSPI hspi1
+#define BARO_HSPI hspi1
+
+#define CONTROL_HTIM htim6
+
 /**
  * @brief Initializes the program.
  */

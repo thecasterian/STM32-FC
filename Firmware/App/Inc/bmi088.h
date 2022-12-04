@@ -9,8 +9,6 @@
 #ifndef BMI088_H
 #define BMI088_H
 
-#include "spi.h"
-
 /**
  * @brief BMI088 accelerometer maximum measurement range.
  */
@@ -100,79 +98,40 @@ typedef enum {
 } bmi088_gyro_odr_bwp;
 
 /**
- * @brief BMI088 accelerometer and gyro sensor.
- */
-typedef struct {
-    /** SPI handle. */
-    SPI_HandleTypeDef *hspi;
-
-    /** Accelerometer NSS port. */
-    GPIO_TypeDef *acc_nss_port;
-    /** Accelerometer NSS pin. */
-    uint16_t acc_nss_pin;
-    /** Gyro NSS port. */
-    GPIO_TypeDef *gyro_nss_port;
-    /** Gyro NSS pin. */
-    uint16_t gyro_nss_pin;
-
-    /** Accelerometer chip ID. */
-    uint8_t acc_chip_id;
-    /** Gyro chip ID. */
-    uint8_t gyro_chip_id;
-
-    /** Accelerometer maximum measurement range. */
-    bmi088_acc_range_t acc_range;
-    /** Gyro maximum measurement range. */
-    bmi088_gyro_range_t gyro_range;
-} bmi088_t;
-
-/**
  * @brief Initializes the BMI088.
- *
- * @param[out] bmi088 BMI088.
- * @param[in] hspi SPI handle that the BMI088 is connected to.
- * @param[in] acc_nss_port Accelerometer NSS port.
- * @param acc_nss_pin Accelerometer NSS pin.
- * @param[in] gyro_nss_port Gyro NSS port.
- * @param gyro_nss_pin Gyro NSS pin.
  */
-void bmi088_init(bmi088_t *bmi088, SPI_HandleTypeDef *hspi, GPIO_TypeDef *acc_nss_port, uint16_t acc_nss_pin,
-                 GPIO_TypeDef *gyro_nss_port, uint16_t gyro_nss_pin);
+void bmi088_init(void);
 
 /**
  * @brief Sets the maximum measurement range.
  *
- * @param[out] bmi088 BMI088.
  * @param acc_range Accelerometer maximum measurement range.
  * @param gyro_range Gyro maximum measurement range.
  */
-void bmi088_set_range(bmi088_t *bmi088, bmi088_acc_range_t acc_range, bmi088_gyro_range_t gyro_range);
+void bmi088_set_range(bmi088_acc_range_t acc_range, bmi088_gyro_range_t gyro_range);
 
 /**
  * @brief Sets the output data rate (ODR) and low-pass filter bandwidth parameter (BWP).
  *
- * @param[out] bmi088 BMI088.
  * @param acc_odr Accelerometer ODR.
  * @param acc_bwp Accelerometer BWP.
  * @param gyro_odr_bwp Gyro ODR and BWP.
  */
-void bmi088_set_odr_bwp(bmi088_t *bmi088, bmi088_acc_odr_t acc_odr, bmi088_acc_bwp_t acc_bwp,
+void bmi088_set_odr_bwp(bmi088_acc_odr_t acc_odr, bmi088_acc_bwp_t acc_bwp,
                         bmi088_gyro_odr_bwp gyro_odr_bwp);
 
 /**
  * @brief Reads the accelerometer measurement.
  *
- * @param[in] bmi088 BMI088.
  * @param[out] acc Acceleration in x, y, and z axes (m/s^2).
  */
-void bmi088_read_acc(bmi088_t *bmi088, float acc[3]);
+void bmi088_read_acc(float acc[3]);
 
 /**
  * @brief Reads the gyro measurement.
  *
- * @param[in] bmi088 BMI088.
  * @param[out] ang Angular velocity in x, y, and z axes (rad/s).
  */
-void bmi088_read_gyro(bmi088_t *bmi088, float ang[3]);
+void bmi088_read_gyro(float ang[3]);
 
 #endif
