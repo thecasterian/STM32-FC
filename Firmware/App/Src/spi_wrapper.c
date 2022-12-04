@@ -1,6 +1,10 @@
-#include "application.h"
 #include "spi.h"
 #include "spi_wrapper.h"
+
+#define GYRO_HSPI hspi1
+#define ACC_HSPI hspi1
+#define MAG_HSPI hspi1
+#define BARO_HSPI hspi1
 
 #define FLAG_READ 0x80
 #define MASK_WRITE 0x7F

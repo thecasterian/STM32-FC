@@ -90,18 +90,18 @@ static void bmp280_read_compen_param(void) {
 
     bmp280_read_reg(REG_CALIB00, data, sizeof(data));
 
-    bmp280_config.dig_t1 = PACK_2(data[1], data[0]);
-    bmp280_config.dig_t2 = to_int16(PACK_2(data[3], data[2]));
-    bmp280_config.dig_t3 = to_int16(PACK_2(data[5], data[4]));
-    bmp280_config.dig_p1 = PACK_2(data[7], data[6]);
-    bmp280_config.dig_p2 = to_int16(PACK_2(data[9], data[8]));
-    bmp280_config.dig_p3 = to_int16(PACK_2(data[11], data[10]));
-    bmp280_config.dig_p4 = to_int16(PACK_2(data[13], data[12]));
-    bmp280_config.dig_p5 = to_int16(PACK_2(data[15], data[14]));
-    bmp280_config.dig_p6 = to_int16(PACK_2(data[17], data[16]));
-    bmp280_config.dig_p7 = to_int16(PACK_2(data[19], data[18]));
-    bmp280_config.dig_p8 = to_int16(PACK_2(data[21], data[20]));
-    bmp280_config.dig_p9 = to_int16(PACK_2(data[23], data[22]));
+    bmp280_config.dig_t1 = pack2(data[1], data[0]);
+    bmp280_config.dig_t2 = to_int16(pack2(data[3], data[2]));
+    bmp280_config.dig_t3 = to_int16(pack2(data[5], data[4]));
+    bmp280_config.dig_p1 = pack2(data[7], data[6]);
+    bmp280_config.dig_p2 = to_int16(pack2(data[9], data[8]));
+    bmp280_config.dig_p3 = to_int16(pack2(data[11], data[10]));
+    bmp280_config.dig_p4 = to_int16(pack2(data[13], data[12]));
+    bmp280_config.dig_p5 = to_int16(pack2(data[15], data[14]));
+    bmp280_config.dig_p6 = to_int16(pack2(data[17], data[16]));
+    bmp280_config.dig_p7 = to_int16(pack2(data[19], data[18]));
+    bmp280_config.dig_p8 = to_int16(pack2(data[21], data[20]));
+    bmp280_config.dig_p9 = to_int16(pack2(data[23], data[22]));
 }
 
 static void bmp280_compen_temp(int32_t adc_temp, int32_t *t_fine, float *temp) {

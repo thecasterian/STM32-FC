@@ -9,16 +9,15 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
-/**
- * @brief Packs two bytes into a 16-bit integer.
- *
- * @param B1 Most significant byte.
- * @param B0 Least significant byte.
- */
-#define PACK_2(B1, B0) (((B1) << 8) | (B0))
-
+uint16_t pack2(uint8_t b1, uint8_t b0);
 int16_t to_int16(uint16_t x);
+
+bool is_boolean_u8(uint8_t x);
+
+void memcpy_to_volatile(volatile uint8_t *dst, const uint8_t *src, uint16_t size);
+void memcpy_from_volatile(uint8_t *dst, const volatile uint8_t *src, uint16_t size);
 
 #endif

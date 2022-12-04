@@ -2,6 +2,8 @@
 #include "tim.h"
 #include "tim_wrapper.h"
 
+#define CONTROL_HTIM htim6
+
 static volatile bool control_timer_flag = false;
 
 void control_timer_start(void) {

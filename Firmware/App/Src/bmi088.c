@@ -98,7 +98,7 @@ void bmi088_read_acc(float acc[3]) {
     bmi088_read_acc_reg(REG_ACC_DATA, data, sizeof(data));
 
     for (int16_t i = 0; i < 3; i++) {
-        x = PACK_2(data[2 * i + 1], data[2 * i]);
+        x = pack2(data[2 * i + 1], data[2 * i]);
         acc[i] = to_int16(x) / 32768.f * acc_range_sf[bmi088_config.acc_range] * ACC_GRAV;
     }
 }
@@ -110,7 +110,7 @@ void bmi088_read_gyro(float ang[3]) {
     bmi088_read_gyro_reg(REG_GYRO_DATA, data, sizeof(data));
 
     for (int16_t i = 0; i < 3; i++) {
-        x = PACK_2(data[2 * i + 1], data[2 * i]);
+        x = pack2(data[2 * i + 1], data[2 * i]);
         ang[i] = to_int16(x) / 32767.f * gyro_range_sf[bmi088_config.gyro_range] * DEG_TO_RAD;
     }
 }

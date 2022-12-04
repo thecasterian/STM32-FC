@@ -44,7 +44,7 @@ void lis2mdl_read_mag(float *mag) {
 
     /* Read magnetic field. */
     for (int16_t i = 0; i < 3; i++) {
-        x = PACK_2(data[2 * i + 1], data[2 * i]);
+        x = pack2(data[2 * i + 1], data[2 * i]);
         mag[i] = to_int16(x) * SENSITIVITY;
     }
 }

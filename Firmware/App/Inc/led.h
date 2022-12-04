@@ -1,0 +1,15 @@
+#ifndef LED_H
+#define LED_H
+
+#include <stdbool.h>
+
+typedef enum {
+    LED_STATE_OFF = 0,
+    LED_STATE_ON  = 1,
+} led_state_t;
+
+void led_red_write(led_state_t state);
+void led_green_write(led_state_t state);
+void led_blue_write(led_state_t state);
+
+#endif

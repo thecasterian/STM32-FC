@@ -14,6 +14,9 @@
 #define TYP_RESP 0x91
 #define TYP_STRM 0x92
 
+#define CMD_START 0xA0
+#define CMD_END   0xA5
+
 #define CMD_LED_RED   0xA0
 #define CMD_LED_GREEN 0xA1
 #define CMD_LED_BLUE  0xA2
@@ -27,6 +30,9 @@
 #define ERR_CMD_INVAL 0xE4
 #define ERR_LEN_INVAL 0xE5
 #define ERR_ARG_INVAL 0xE6
+
+#define DAT_START 0x00
+#define DAT_END   0x18
 
 #define DAT_ACC          0x00
 #define DAT_ANG          0x01
@@ -44,8 +50,6 @@
 #define DAT_ACC_MAG_QUAT 0x15
 #define DAT_ACC_MAG_RPY  0x16
 #define DAT_BARO_HEIGHT  0x17
-
-#define DAT_NUM 0x18
 
 #define PROTOCOL_LEN_MAX 255
 
