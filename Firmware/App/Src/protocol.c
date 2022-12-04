@@ -4,7 +4,7 @@
 #include "protocol.h"
 #include "ring_buffer.h"
 #include "streaming_data.h"
-#include "usbd_cdc_if.h"
+#include "usb_wrapper.h"
 #include "util.h"
 
 #define CMD_HDL_LIST_INIT(ID, HDL) [ID - CMD_START] = HDL
@@ -160,7 +160,7 @@ void response_send(uint8_t err) {
     buf[5] = calc_checksum(&buf[3], 2U);
     buf[6] = ETX;
 
-    CDC_Transmit_FS(buf, sizeof(buf));
+    usb_transmit(buf, sizeof(buf));
 }
 
 void stream_send(void) {
@@ -181,7 +181,7 @@ void stream_send(void) {
         buf[buf[2] + 3U] = calc_checksum(&buf[3], buf[2]);
         buf[buf[2] + 4U] = ETX;
 
-        CDC_Transmit_FS(buf, buf[2] + 5U);
+        usb_transmit(buf, buf[2] + 5U);
     }
 }
 
