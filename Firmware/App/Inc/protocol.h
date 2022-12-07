@@ -61,10 +61,12 @@ typedef struct {
     uint8_t etx;                                /* ETX. */
 } packet_t;
 
+void packet_parser_init(void);
 bool packet_receive(packet_t *packet);
+uint8_t packet_validate(packet_t *packet);
 
-uint8_t command_execute(packet_t *packet);
+uint8_t packet_checksum_calc(const uint8_t *dat, uint8_t len);
+
 void response_send(uint8_t err);
-void stream_send(void);
 
 #endif

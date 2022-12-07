@@ -1,0 +1,59 @@
+#include <string.h>
+#include "streaming.h"
+#include "usb_wrapper.h"
+
+#define STRM_DAT_LIST_INIT(ID, DAT, SIZE) [ID - DAT_START] = { .dat = DAT, .size = SIZE }
+
+float acc[3], ang[3], mag[3], pres, temp;
+float acc_raw[3], ang_raw[3], mag_raw[3];
+quaternion_t q;
+float rpy[3], vel[3], pos[3], acc_ext[3];
+quaternion_t q_acc_mag;
+float rpy_acc_mag[3], baro_height;
+
+/* Is streaming enabled? */
+bool strm_en;
+/* Is streaming data selected? */
+bool strm_dat_sel[DAT_END - DAT_START];
+
+/* List of streaming data. */
+const strm_dat_t strm_dat_list[DAT_END - DAT_START] = {
+    STRM_DAT_LIST_INIT( DAT_ACC,          acc,          12U ),
+    STRM_DAT_LIST_INIT( DAT_ANG,          ang,          12U ),
+    STRM_DAT_LIST_INIT( DAT_MAG,          mag,          12U ),
+    STRM_DAT_LIST_INIT( DAT_PRES,         &pres,         4U ),
+    STRM_DAT_LIST_INIT( DAT_TEMP,         &temp,         4U ),
+    STRM_DAT_LIST_INIT( DAT_RAW_ACC,      acc_raw,      12U ),
+    STRM_DAT_LIST_INIT( DAT_RAW_GYRO,     ang_raw,      12U ),
+    STRM_DAT_LIST_INIT( DAT_RAW_MAG,      mag_raw,      12U ),
+    STRM_DAT_LIST_INIT( DAT_KF_QUAT,      &q.w,         16U ),
+    STRM_DAT_LIST_INIT( DAT_KF_RPY,       rpy,          12U ),
+    STRM_DAT_LIST_INIT( DAT_KF_VEL,       vel,          12U ),
+    STRM_DAT_LIST_INIT( DAT_KF_POS,       pos,          12U ),
+    STRM_DAT_LIST_INIT( DAT_EXT_ACC,      acc_ext,      12U ),
+    STRM_DAT_LIST_INIT( DAT_ACC_MAG_QUAT, &q_acc_mag.w, 16U ),
+    STRM_DAT_LIST_INIT( DAT_ACC_MAG_RPY,  rpy_acc_mag,  12U ),
+    STRM_DAT_LIST_INIT( DAT_BARO_HEIGHT,  &baro_height,  4U ),
+};
+
+void streaming_send(void) {
+    uint8_t buf[PROTOCOL_LEN_MAX + 5];
+
+    if (strm_en) {
+        buf[0] = STX;
+        buf[1] = TYP_STRM;
+
+        buf[2] = 0U;
+        for (int16_t i = 0; i < DAT_END - DAT_START; i++) {
+            if (strm_dat_sel[i]) {
+                memcpy(&buf[buf[2] + 3U], strm_dat_list[i].dat, strm_dat_list[i].size);
+                buf[2] += strm_dat_list[i].size;
+            }
+        }
+
+        buf[buf[2] + 3U] = packet_checksum_calc(&buf[3], buf[2]);
+        buf[buf[2] + 4U] = ETX;
+
+        usb_transmit(buf, buf[2] + 5U);
+    }
+}

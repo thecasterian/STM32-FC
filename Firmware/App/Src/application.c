@@ -2,16 +2,19 @@
 #include "bmi088.h"
 #include "bmp280.h"
 #include "calib.h"
+#include "command.h"
 #include "lis2mdl.h"
 #include "main.h"
 #include "protocol.h"
-#include "streaming_data.h"
+#include "streaming.h"
 #include "tim_wrapper.h"
 
 static packet_t packet;
 
 void setup(void) {
     control_timer_start();
+
+    packet_parser_init();
 
     bmi088_init();
     bmi088_set_range(BMI088_ACC_RANGE_24G, BMI088_GYRO_RANGE_2000DPS);
@@ -50,13 +53,16 @@ void loop(void) {
         mag[1] = mag_ss_frm[0];
         mag[2] = -mag_ss_frm[2];
 
-        stream_send();
+        streaming_send();
 
         control_timer_clear_flag();
     }
 
     if (packet_receive(&packet)) {
-        err = command_execute(&packet);
+        err = packet_validate(&packet);
+        if (err == ERR_OK) {
+            err = command_execute(packet.dat[0], &packet.dat[1], packet.len - 1U);
+        }
         response_send(err);
     }
 }
