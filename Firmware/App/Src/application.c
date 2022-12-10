@@ -1,6 +1,5 @@
 #include "application.h"
 #include "bmi088.h"
-#include "bmp280.h"
 #include "calib.h"
 #include "command.h"
 #include "lis2mdl.h"
@@ -22,9 +21,6 @@ void setup(void) {
 
     lis2mdl_init();
     lis2mdl_set_odr(LIS2MDL_ODR_100Hz);
-
-    bmp280_init();
-    bmp280_set_param(BMP280_OSPL_X16, BMP280_OSPL_X2, BMP280_STBY_TIME_0_5_MS, BMP280_IIR_OFF);
 }
 
 void loop(void) {
@@ -35,7 +31,6 @@ void loop(void) {
         bmi088_read_acc(acc_raw);
         bmi088_read_gyro(ang_raw);
         lis2mdl_read_mag(mag_raw);
-        bmp280_read_pres_temp(&pres, &temp);
 
         /* Calibrate. */
         calib_acc(acc_raw, acc_ss_frm);

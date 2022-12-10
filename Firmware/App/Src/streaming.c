@@ -4,12 +4,12 @@
 
 #define STRM_DAT_LIST_INIT(ID, DAT, SIZE) [ID - DAT_START] = { .dat = DAT, .size = SIZE }
 
-float acc[3], ang[3], mag[3], pres, temp;
+float acc[3], ang[3], mag[3];
 float acc_raw[3], ang_raw[3], mag_raw[3];
 quaternion_t q;
-float rpy[3], vel[3], pos[3], acc_ext[3];
+float rpy[3];
 quaternion_t q_acc_mag;
-float rpy_acc_mag[3], baro_height;
+float rpy_acc_mag[3];
 
 /* Is streaming enabled? */
 bool strm_en;
@@ -21,23 +21,17 @@ const strm_dat_t strm_dat_list[DAT_END - DAT_START] = {
     STRM_DAT_LIST_INIT( DAT_ACC,          acc,          12U ),
     STRM_DAT_LIST_INIT( DAT_ANG,          ang,          12U ),
     STRM_DAT_LIST_INIT( DAT_MAG,          mag,          12U ),
-    STRM_DAT_LIST_INIT( DAT_PRES,         &pres,         4U ),
-    STRM_DAT_LIST_INIT( DAT_TEMP,         &temp,         4U ),
     STRM_DAT_LIST_INIT( DAT_RAW_ACC,      acc_raw,      12U ),
     STRM_DAT_LIST_INIT( DAT_RAW_GYRO,     ang_raw,      12U ),
     STRM_DAT_LIST_INIT( DAT_RAW_MAG,      mag_raw,      12U ),
     STRM_DAT_LIST_INIT( DAT_KF_QUAT,      &q.w,         16U ),
     STRM_DAT_LIST_INIT( DAT_KF_RPY,       rpy,          12U ),
-    STRM_DAT_LIST_INIT( DAT_KF_VEL,       vel,          12U ),
-    STRM_DAT_LIST_INIT( DAT_KF_POS,       pos,          12U ),
-    STRM_DAT_LIST_INIT( DAT_EXT_ACC,      acc_ext,      12U ),
     STRM_DAT_LIST_INIT( DAT_ACC_MAG_QUAT, &q_acc_mag.w, 16U ),
     STRM_DAT_LIST_INIT( DAT_ACC_MAG_RPY,  rpy_acc_mag,  12U ),
-    STRM_DAT_LIST_INIT( DAT_BARO_HEIGHT,  &baro_height,  4U ),
 };
 
 void streaming_send(void) {
-    uint8_t buf[PROTOCOL_LEN_MAX + 5];
+    uint8_t buf[LEN_MAX + 5];
 
     if (strm_en) {
         buf[0] = STX;

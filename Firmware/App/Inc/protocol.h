@@ -32,31 +32,25 @@
 #define ERR_ARG_INVAL 0xE6
 
 #define DAT_START 0x00
-#define DAT_END   0x18
+#define DAT_END   0x1A
 
 #define DAT_ACC          0x00
 #define DAT_ANG          0x01
 #define DAT_MAG          0x02
-#define DAT_PRES         0x03
-#define DAT_TEMP         0x04
-#define DAT_RAW_ACC      0x05
-#define DAT_RAW_GYRO     0x06
-#define DAT_RAW_MAG      0x07
+#define DAT_RAW_ACC      0x08
+#define DAT_RAW_GYRO     0x09
+#define DAT_RAW_MAG      0x0A
 #define DAT_KF_QUAT      0x10
 #define DAT_KF_RPY       0x11
-#define DAT_KF_VEL       0x12
-#define DAT_KF_POS       0x13
-#define DAT_EXT_ACC      0x14
-#define DAT_ACC_MAG_QUAT 0x15
-#define DAT_ACC_MAG_RPY  0x16
-#define DAT_BARO_HEIGHT  0x17
+#define DAT_ACC_MAG_QUAT 0x18
+#define DAT_ACC_MAG_RPY  0x19
 
-#define PROTOCOL_LEN_MAX 255
+#define LEN_MAX 255
 
 typedef struct {
     uint8_t typ;                                /* Packet type. */
     uint8_t len;                                /* Data length. */
-    uint8_t dat[PROTOCOL_LEN_MAX];              /* Data. */
+    uint8_t dat[LEN_MAX];              /* Data. */
     uint8_t cks;                                /* Data checksum. */
     uint8_t etx;                                /* ETX. */
 } packet_t;

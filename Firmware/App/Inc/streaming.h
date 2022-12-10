@@ -10,12 +10,12 @@ typedef struct {
     uint8_t size;
 } strm_dat_t;
 
-extern float acc[3], ang[3], mag[3], pres, temp;
+extern float acc[3], ang[3], mag[3];
 extern float acc_raw[3], ang_raw[3], mag_raw[3];
 extern quaternion_t q;
-extern float rpy[3], vel[3], pos[3], acc_ext[3];
+extern float rpy[3];
 extern quaternion_t q_acc_mag;
-extern float rpy_acc_mag[3], baro_height;
+extern float rpy_acc_mag[3];
 
 /* Is streaming enabled? */
 extern bool strm_en;
