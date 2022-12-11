@@ -8,8 +8,6 @@
 #include "streaming.h"
 #include "tim_wrapper.h"
 
-static packet_t packet;
-
 void setup(void) {
     control_timer_start();
 
@@ -25,6 +23,7 @@ void setup(void) {
 
 void loop(void) {
     float acc_ss_frm[3], ang_ss_frm[3], mag_ss_frm[3];
+    packet_t packet;
     uint8_t err;
 
     if (control_timer_get_flag()) {

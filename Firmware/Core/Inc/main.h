@@ -63,6 +63,8 @@ void Error_Handler(void);
 #define LED_GREEN_GPIO_Port GPIOC
 #define LED_BLUE_Pin GPIO_PIN_2
 #define LED_BLUE_GPIO_Port GPIOC
+#define V_BATT_Pin GPIO_PIN_4
+#define V_BATT_GPIO_Port GPIOC
 #define GYRO_NSS_Pin GPIO_PIN_0
 #define GYRO_NSS_GPIO_Port GPIOB
 #define ACC_NSS_Pin GPIO_PIN_1
@@ -71,6 +73,8 @@ void Error_Handler(void);
 #define MAG_NSS_GPIO_Port GPIOB
 #define BARO_NSS_Pin GPIO_PIN_10
 #define BARO_NSS_GPIO_Port GPIOB
+#define FLASH_NSS_Pin GPIO_PIN_12
+#define FLASH_NSS_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
