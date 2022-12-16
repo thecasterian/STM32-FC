@@ -15,13 +15,16 @@
 #define TYP_STRM 0x92
 
 #define CMD_START 0xA0
-#define CMD_END   0xA5
+#define CMD_END   0xB4
 
 #define CMD_LED_RED   0xA0
 #define CMD_LED_GREEN 0xA1
 #define CMD_LED_BLUE  0xA2
 #define CMD_STRM_DAT  0xA3
 #define CMD_STRM      0xA4
+#define CMD_ESC_PRTCL 0xB1
+#define CMD_PWM       0xB2
+#define CMD_THROT     0xB3
 
 #define ERR_OK        0xE0
 #define ERR_ETX_MIS   0xE1
@@ -55,12 +58,41 @@ typedef struct {
     uint8_t etx;                                /* ETX. */
 } packet_t;
 
+/**
+ * @brief Initializes the packet parser.
+ */
 void packet_parser_init(void);
+
+/**
+ * @brief Receives a packet.
+ *
+ * @param packet Pointer to the packet to be received.
+ * @return true if a packet was received, false otherwise.
+ */
 bool packet_receive(packet_t *packet);
+
+/**
+ * @brief Validates a packet.
+ *
+ * @param packet Pointer to the packet to validate.
+ * @return Error code.
+ */
 uint8_t packet_validate(packet_t *packet);
 
-uint8_t packet_checksum_calc(const uint8_t *dat, uint8_t len);
+/**
+ * @brief Calculates the checksum defined in the packet.
+ *
+ * @param dat DAT field of the packet.
+ * @param len Length of the DAT field.
+ * @return Checksum.
+ */
+uint8_t packet_checksum_calc(const uint8_t dat[], uint8_t len);
 
+/**
+ * @brief Sends a response packet.
+ *
+ * @param err Error code returned from the latest received command packet.
+ */
 void response_send(uint8_t err);
 
 #endif

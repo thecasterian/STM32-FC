@@ -104,7 +104,7 @@ uint8_t packet_validate(packet_t *packet) {
     return err;
 }
 
-uint8_t packet_checksum_calc(const uint8_t *buf, uint8_t size) {
+uint8_t packet_checksum_calc(const uint8_t buf[], uint8_t size) {
     uint8_t checksum;
 
     checksum = 0U;

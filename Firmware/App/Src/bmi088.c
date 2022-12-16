@@ -81,8 +81,8 @@ void bmi088_init(void) {
 void bmi088_set_range(bmi088_acc_range_t acc_range, bmi088_gyro_range_t gyro_range) {
     bmi088_write_acc_reg(REG_ACC_RANGE, acc_range);
     bmi088_write_gyro_reg(REG_GYRO_RANGE, gyro_range);
-    acc_range = acc_range;
-    gyro_range = gyro_range;
+    bmi088_config.acc_range = acc_range;
+    bmi088_config.gyro_range = gyro_range;
 }
 
 void bmi088_set_odr_bwp(bmi088_acc_odr_t acc_odr, bmi088_acc_bwp_t acc_bwp,

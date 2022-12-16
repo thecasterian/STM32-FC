@@ -2,6 +2,7 @@
 #include "bmi088.h"
 #include "calib.h"
 #include "command.h"
+#include "esc.h"
 #include "lis2mdl.h"
 #include "main.h"
 #include "protocol.h"
@@ -19,6 +20,8 @@ void setup(void) {
 
     lis2mdl_init();
     lis2mdl_set_odr(LIS2MDL_ODR_100Hz);
+
+    esc_set_protocol(ESC_PRTCL_ONESHOT125);
 }
 
 void loop(void) {
@@ -46,6 +49,8 @@ void loop(void) {
         mag[0] = -mag_ss_frm[1];
         mag[1] = mag_ss_frm[0];
         mag[2] = -mag_ss_frm[2];
+
+        esc_send_throttle();
 
         streaming_send();
 
