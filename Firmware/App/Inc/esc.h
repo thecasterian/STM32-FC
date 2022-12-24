@@ -1,3 +1,11 @@
+/**
+ * @file esc.h
+ * @author Jeongu Kim (jeongukim@kaist.ac.kr)
+ * @brief ESC (electric speed controller) driver.
+ *
+ * @copyright (c) 2022 Jeongu Kim <jeongukim@kaist.ac.kr>
+ */
+
 #ifndef ESC_H
 #define ESC_H
 

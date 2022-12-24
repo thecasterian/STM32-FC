@@ -1,3 +1,11 @@
+/**
+ * @file spi_wrapper.h
+ * @author Jeongu Kim (jeongukim@kaist.ac.kr)
+ * @brief STM32 SPI communication wrapper.
+ *
+ * @copyright (c) 2022 Jeongu Kim <jeongukim@kaist.ac.kr>
+ */
+
 #ifndef SPI_WRAPPER_H
 #define SPI_WRAPPER_H
 

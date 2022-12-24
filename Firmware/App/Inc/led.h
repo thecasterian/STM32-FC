@@ -1,3 +1,11 @@
+/**
+ * @file led.h
+ * @author Jeongu Kim (jeongukim@kaist.ac.kr)
+ * @brief Debug LED driver.
+ *
+ * @copyright (c) 2022 Jeongu Kim <jeongukim@kaist.ac.kr>
+ */
+
 #ifndef LED_H
 #define LED_H
 

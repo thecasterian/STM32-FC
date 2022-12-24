@@ -1,3 +1,11 @@
+/**
+ * @file streaming.h
+ * @author Jeongu Kim (jeongukim@kaist.ac.kr)
+ * @brief Data streaming.
+ *
+ * @copyright (c) 2022 Jeongu Kim <jeongukim@kaist.ac.kr>
+ */
+
 #ifndef STREAMING_DATA_H
 #define STREAMING_DATA_H
 

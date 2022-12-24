@@ -1,3 +1,11 @@
+/**
+ * @file command.h
+ * @author Jeongu Kim (jeongukim@kaist.ac.kr)
+ * @brief Command handler.
+ *
+ * @copyright (c) 2022 Jeongu Kim <jeongukim@kaist.ac.kr>
+ */
+
 #ifndef COMMAND_H
 #define COMMAND_H
 
