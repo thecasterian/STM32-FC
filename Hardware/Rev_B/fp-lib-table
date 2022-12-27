@@ -1,0 +1,4 @@
+(fp_lib_table
+  (lib (name "Custom_Parts")(type "KiCad")(uri "${KIPRJMOD}/Custom_Parts")(options "")(descr ""))
+  (lib (name "FUET-4020")(type "KiCad")(uri "${KIPRJMOD}/Custom_Parts/FUET-4020.pretty")(options "")(descr ""))
+)
