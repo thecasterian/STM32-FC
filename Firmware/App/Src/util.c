@@ -1,3 +1,4 @@
+#include <math.h>
 #include "util.h"
 
 uint16_t pack2(uint8_t b1, uint8_t b0) {
@@ -22,4 +23,8 @@ void memcpy_from_volatile(uint8_t *dst, const volatile uint8_t *src, uint16_t si
     for (uint16_t i = 0; i < size; i++) {
         dst[i] = src[i];
     }
+}
+
+float norm2(float x, float y) {
+    return sqrtf((x * x) + (y * y));
 }

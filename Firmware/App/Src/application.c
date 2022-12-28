@@ -1,4 +1,5 @@
 #include "application.h"
+#include "attitude.h"
 #include "bmi088.h"
 #include "calib.h"
 #include "command.h"
@@ -33,6 +34,8 @@ void setup(void) {
 
     lis2mdl_init();
     lis2mdl_set_odr(LIS2MDL_ODR_100Hz);
+
+    attitude_init(1000U);
 
     esc_set_protocol(ESC_PRTCL_ONESHOT125);
 
@@ -93,6 +96,9 @@ static void standby(void) {
     mag[0] = -mag_ss_frm[1];
     mag[1] = mag_ss_frm[0];
     mag[2] = -mag_ss_frm[2];
+
+    /* Attitude estimation. */
+    attitude_from_measurement(acc, mag, &q_meas, rpy_meas);
 
     esc_send_throttle();
 

@@ -53,8 +53,8 @@
 #define DAT_RAW_MAG      0x1A
 #define DAT_KF_QUAT      0x20
 #define DAT_KF_RPY       0x21
-#define DAT_ACC_MAG_QUAT 0x28
-#define DAT_ACC_MAG_RPY  0x29
+#define DAT_MEAS_QUAT    0x28
+#define DAT_MEAS_RPY     0x29
 
 #define LEN_MAX 255
 

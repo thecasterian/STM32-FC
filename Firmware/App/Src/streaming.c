@@ -8,8 +8,8 @@ float acc[3], ang[3], mag[3];
 float acc_raw[3], ang_raw[3], mag_raw[3];
 quaternion_t q;
 float rpy[3];
-quaternion_t q_acc_mag;
-float rpy_acc_mag[3];
+quaternion_t q_meas;
+float rpy_meas[3];
 
 /* Is streaming enabled? */
 bool strm_en;
@@ -18,16 +18,16 @@ bool strm_dat_sel[DAT_END - DAT_START];
 
 /* List of streaming data. */
 const strm_dat_t strm_dat_list[DAT_END - DAT_START] = {
-    STRM_DAT_LIST_INIT( DAT_ACC,          acc,          12U ),
-    STRM_DAT_LIST_INIT( DAT_ANG,          ang,          12U ),
-    STRM_DAT_LIST_INIT( DAT_MAG,          mag,          12U ),
-    STRM_DAT_LIST_INIT( DAT_RAW_ACC,      acc_raw,      12U ),
-    STRM_DAT_LIST_INIT( DAT_RAW_GYRO,     ang_raw,      12U ),
-    STRM_DAT_LIST_INIT( DAT_RAW_MAG,      mag_raw,      12U ),
-    STRM_DAT_LIST_INIT( DAT_KF_QUAT,      &q.w,         16U ),
-    STRM_DAT_LIST_INIT( DAT_KF_RPY,       rpy,          12U ),
-    STRM_DAT_LIST_INIT( DAT_ACC_MAG_QUAT, &q_acc_mag.w, 16U ),
-    STRM_DAT_LIST_INIT( DAT_ACC_MAG_RPY,  rpy_acc_mag,  12U ),
+    STRM_DAT_LIST_INIT( DAT_ACC,       acc,       12U ),
+    STRM_DAT_LIST_INIT( DAT_ANG,       ang,       12U ),
+    STRM_DAT_LIST_INIT( DAT_MAG,       mag,       12U ),
+    STRM_DAT_LIST_INIT( DAT_RAW_ACC,   acc_raw,   12U ),
+    STRM_DAT_LIST_INIT( DAT_RAW_GYRO,  ang_raw,   12U ),
+    STRM_DAT_LIST_INIT( DAT_RAW_MAG,   mag_raw,   12U ),
+    STRM_DAT_LIST_INIT( DAT_KF_QUAT,   &q.w,      16U ),
+    STRM_DAT_LIST_INIT( DAT_KF_RPY,    rpy,       12U ),
+    STRM_DAT_LIST_INIT( DAT_MEAS_QUAT, &q_meas.w, 16U ),
+    STRM_DAT_LIST_INIT( DAT_MEAS_RPY,  rpy_meas,  12U ),
 };
 
 void streaming_send(void) {
