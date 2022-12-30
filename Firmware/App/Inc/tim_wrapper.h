@@ -39,19 +39,20 @@ bool control_timer_get_flag(void);
 void control_timer_clear_flag(void);
 
 /**
- * @brief Set the PWM frequency.
- *
- * @param freq Frequency in Hz.
+ * @brief Starts PWM output.
  */
-void pwm_set_frequency(float freq);
+void pwm_start(void);
 
 /**
- * @brief Sends a packet of PWM signals.
- *
- * @param ch PWM channel.
- * @param width Array of pulse widths in us.
- * @param len Length of the packet.
+ * @brief Stops PWM output.
  */
-void pwm_send_packet(pwm_channel_t ch, float width[], uint16_t len);
+void pwm_stop(void);
+
+/**
+ * @brief Sets the PWM output periods.
+ *
+ * @param[in] period Array of PWM output periods.
+ */
+void pwm_set_period(const uint32_t period[4]);
 
 #endif

@@ -27,9 +27,8 @@
 
 #define CMD_STRM_DAT  0xA0
 #define CMD_STRM      0xA1
-#define CMD_ESC_PRTCL 0xA2
+#define CMD_THROT     0xA2
 #define CMD_PWM       0xA3
-#define CMD_THROT     0xA4
 #define CMD_LED_RED   0xD0
 #define CMD_LED_GREEN 0xD1
 #define CMD_LED_BLUE  0xD2

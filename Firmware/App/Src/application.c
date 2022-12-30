@@ -23,7 +23,16 @@ static void standby(void);
 static void flight(void);
 static void emer(void);
 
+static void calc_attitude(void);
+
 void setup(void) {
+    const pwm_channel_t motor_pwm_mapping[4] = {
+        PWM_CHANNEL_1,
+        PWM_CHANNEL_2,
+        PWM_CHANNEL_3,
+        PWM_CHANNEL_4,
+    };
+
     control_timer_start();
 
     packet_parser_init();
@@ -37,7 +46,7 @@ void setup(void) {
 
     attitude_init(1000U);
 
-    esc_set_protocol(ESC_PRTCL_ONESHOT125);
+    esc_set_motor_pwm_mapping(motor_pwm_mapping);
 
     /* Initialization end. */
     mode = MODE_STANDBY;
@@ -75,6 +84,22 @@ void loop(void) {
 }
 
 static void standby(void) {
+    calc_attitude();
+
+    streaming_send();
+}
+
+static void flight(void) {
+    calc_attitude();
+}
+
+static void emer(void) {
+    const float throttle_zero[4] = {0.f, 0.f, 0.f, 0.f};
+
+    esc_set_throttle(throttle_zero);
+}
+
+static void calc_attitude(void) {
     float acc_ss_frm[3], ang_ss_frm[3], mag_ss_frm[3];
 
     bmi088_read_acc(acc_raw);
@@ -99,21 +124,4 @@ static void standby(void) {
 
     /* Attitude estimation. */
     attitude_from_measurement(acc, mag, &q_meas, rpy_meas);
-
-    esc_send_throttle();
-
-    streaming_send();
-}
-
-static void flight(void) {
-
-}
-
-static void emer(void) {
-    esc_set_throttle(MOTOR_POSITION_FRONT_LEFT, 0.f);
-    esc_set_throttle(MOTOR_POSITION_FRONT_RIGHT, 0.f);
-    esc_set_throttle(MOTOR_POSITION_REAR_LEFT, 0.f);
-    esc_set_throttle(MOTOR_POSITION_REAR_RIGHT, 0.f);
-
-    esc_send_throttle();
 }

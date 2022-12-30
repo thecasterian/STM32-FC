@@ -12,11 +12,8 @@ static uint8_t cmd_hdl_led_green(const uint8_t arg[], uint8_t arglen);
 static uint8_t cmd_hdl_led_blue(const uint8_t arg[], uint8_t arglen);
 static uint8_t cmd_hdl_strm_dat(const uint8_t arg[], uint8_t arglen);
 static uint8_t cmd_hdl_strm(const uint8_t arg[], uint8_t arglen);
-static uint8_t cmd_hdl_esc_prtcl(const uint8_t arg[], uint8_t arglen);
-static uint8_t cmd_hdl_pwm(const uint8_t arg[], uint8_t arglen);
 static uint8_t cmd_hdl_throt(const uint8_t arg[], uint8_t arglen);
-
-static uint8_t cmd_hdl_esc_prtcl(const uint8_t arg[], uint8_t arglen);
+static uint8_t cmd_hdl_pwm(const uint8_t arg[], uint8_t arglen);
 
 typedef uint8_t (*cmd_hdl_t)(const uint8_t arg[], uint8_t arglen);
 static const cmd_hdl_t cmd_hdl_list[CMD_END - CMD_START] = {
@@ -25,9 +22,8 @@ static const cmd_hdl_t cmd_hdl_list[CMD_END - CMD_START] = {
     CMD_HDL_LIST_INIT( CMD_LED_BLUE,  cmd_hdl_led_blue  ),
     CMD_HDL_LIST_INIT( CMD_STRM_DAT,  cmd_hdl_strm_dat  ),
     CMD_HDL_LIST_INIT( CMD_STRM,      cmd_hdl_strm      ),
-    CMD_HDL_LIST_INIT( CMD_ESC_PRTCL, cmd_hdl_esc_prtcl ),
-    CMD_HDL_LIST_INIT( CMD_PWM,       cmd_hdl_pwm       ),
     CMD_HDL_LIST_INIT( CMD_THROT,     cmd_hdl_throt     ),
+    CMD_HDL_LIST_INIT( CMD_PWM,       cmd_hdl_pwm       ),
 };
 
 uint8_t command_execute(uint8_t cmd, const uint8_t arg[], uint8_t arglen) {
@@ -126,18 +122,6 @@ static uint8_t cmd_hdl_strm(const uint8_t arg[], uint8_t arglen) {
     return err;
 }
 
-static uint8_t cmd_hdl_esc_prtcl(const uint8_t arg[], uint8_t arglen) {
-    uint8_t err;
-
-    if (arglen != 1U) {
-        err = ERR_LEN_INVAL;
-    } else {
-        err = esc_set_protocol(arg[0]) ? ERR_OK : ERR_ARG_INVAL;
-    }
-
-    return err;
-}
-
 static uint8_t cmd_hdl_pwm(const uint8_t arg[], uint8_t arglen) {
     uint8_t err;
 
@@ -146,7 +130,11 @@ static uint8_t cmd_hdl_pwm(const uint8_t arg[], uint8_t arglen) {
     } else if (!is_boolean_u8(arg[0])) {
         err = ERR_ARG_INVAL;
     } else {
-        pwm_en = arg[0];
+        if (arg[0] == 1U) {
+            pwm_start();
+        } else {
+            pwm_stop();
+        }
         err = ERR_OK;
     }
 
@@ -171,9 +159,7 @@ static uint8_t cmd_hdl_throt(const uint8_t arg[], uint8_t arglen) {
         }
 
         if (err == ERR_OK) {
-            for (int16_t i = 0; i < 4; i++) {
-                esc_set_throttle(i, throttle[i]);
-            }
+            esc_set_throttle(throttle);
         }
     }
 
