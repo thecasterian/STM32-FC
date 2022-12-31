@@ -1,14 +1,8 @@
-#include "math.h"
+#include <math.h>
+#include <string.h>
 #include "quaternion.h"
 
-void quaternion_init(quaternion_t *q, float w, float x, float y, float z) {
-    q->w = w;
-    q->x = x;
-    q->y = y;
-    q->z = z;
-}
-
-void quaternion_from_euler(quaternion_t *q, float roll, float pitch, float yaw)
+void quaternion_from_euler(float q[4], float roll, float pitch, float yaw)
 {
     float cr, cp, cy, sr, sp, sy;
 
@@ -20,82 +14,82 @@ void quaternion_from_euler(quaternion_t *q, float roll, float pitch, float yaw)
     sp = sinf(pitch / 2.f);
     sy = sinf(yaw / 2.f);
 
-    q->w = cr * cp * cy + sr * sp * sy;
-    q->x = cr * sp * sy - sr * cp * cy;
-    q->y = -(cr * sp * cy + sr * cp * sy);
-    q->z = sr * sp * cy - cr * cp * sy;
+    q[0] = cr * cp * cy + sr * sp * sy;
+    q[1] = cr * sp * sy - sr * cp * cy;
+    q[2] = -(cr * sp * cy + sr * cp * sy);
+    q[3] = sr * sp * cy - cr * cp * sy;
 }
 
-void quaternion_scale(const quaternion_t *q, float scale, quaternion_t *res) {
-    quaternion_t tmp;
+void quaternion_scale(const float q[4], float scale, float res[4]) {
+    float tmp[4];
 
-    tmp.w = q->w * scale;
-    tmp.x = q->x * scale;
-    tmp.y = q->y * scale;
-    tmp.z = q->z * scale;
+    tmp[0] = q[0] * scale;
+    tmp[1] = q[1] * scale;
+    tmp[2] = q[2] * scale;
+    tmp[3] = q[3] * scale;
 
-    *res = tmp;
+    memcpy(res, tmp, 4U * sizeof(float));
 }
 
-void quaternion_normalize(const quaternion_t *q, quaternion_t *res) {
-    quaternion_t tmp;
+void quaternion_normalize(const float q[4], float res[4]) {
+    float tmp[4];
     float norm;
 
-    norm = sqrtf((q->x * q->x) + (q->y * q->y) + (q->z * q->z) + (q->w * q->w));
-    tmp.w = q->w / norm;
-    tmp.x = q->x / norm;
-    tmp.y = q->y / norm;
-    tmp.z = q->z / norm;
+    norm = sqrtf((q[1] * q[1]) + (q[2] * q[2]) + (q[3] * q[3]) + (q[0] * q[0]));
+    tmp[0] = q[0] / norm;
+    tmp[1] = q[1] / norm;
+    tmp[2] = q[2] / norm;
+    tmp[3] = q[3] / norm;
 
-    *res = tmp;
+    memcpy(res, tmp, 4U * sizeof(float));
 }
 
-void quaternion_add(const quaternion_t *q1, const quaternion_t *q2, quaternion_t *res) {
-    quaternion_t tmp;
+void quaternion_add(const float q1[4], const float q2[4], float res[4]) {
+    float tmp[4];
 
-    tmp.w = q1->w + q2->w;
-    tmp.x = q1->x + q2->x;
-    tmp.y = q1->y + q2->y;
-    tmp.z = q1->z + q2->z;
+    tmp[0] = q1[0] + q2[0];
+    tmp[1] = q1[1] + q2[1];
+    tmp[2] = q1[2] + q2[2];
+    tmp[3] = q1[3] + q2[3];
 
-    *res = tmp;
+    memcpy(res, tmp, 4U * sizeof(float));
 }
 
-void quaternion_mul(const quaternion_t *q1, const quaternion_t *q2, quaternion_t *res) {
-    quaternion_t tmp;
+void quaternion_mul(const float q1[4], const float q2[4], float res[4]) {
+    float tmp[4];
 
-    tmp.w = (q1->w * q2->w) - (q1->x * q2->x) - (q1->y * q2->y) - (q1->z * q2->z);
-    tmp.x = (q1->w * q2->x) + (q1->x * q2->w) + (q1->y * q2->z) - (q1->z * q2->y);
-    tmp.y = (q1->w * q2->y) + (q1->y * q2->w) + (q1->z * q2->x) - (q1->x * q2->z);
-    tmp.z = (q1->w * q2->z) + (q1->z * q2->w) + (q1->x * q2->y) - (q1->y * q2->x);
+    tmp[0] = (q1[0] * q2[0]) - (q1[1] * q2[1]) - (q1[2] * q2[2]) - (q1[3] * q2[3]);
+    tmp[1] = (q1[0] * q2[1]) + (q1[1] * q2[0]) + (q1[2] * q2[3]) - (q1[3] * q2[2]);
+    tmp[2] = (q1[0] * q2[2]) + (q1[2] * q2[0]) + (q1[3] * q2[1]) - (q1[1] * q2[3]);
+    tmp[3] = (q1[0] * q2[3]) + (q1[3] * q2[0]) + (q1[1] * q2[2]) - (q1[2] * q2[1]);
 
-    *res = tmp;
+    memcpy(res, tmp, 4U * sizeof(float));
 }
 
-void quaternion_rot_vec(const quaternion_t *q, const float *vec, float *res) {
-    quaternion_t q_vec = {0.f, vec[0], vec[1], vec[2]}, q_conj = {q->w, -q->x, -q->y, -q->z}, q_res;
+void quaternion_rot_vec(const float q[4], const float *vec, float *res) {
+    float q_vec[4] = {0.f, vec[0], vec[1], vec[2]}, q_conj[4] = {q[0], -q[1], -q[2], -q[3]}, q_res[4];
 
-    quaternion_mul(q, &q_vec, &q_vec);
-    quaternion_mul(&q_vec, &q_conj, &q_res);
+    quaternion_mul(q, q_vec, q_vec);
+    quaternion_mul(q_vec, q_conj, q_res);
 
-    res[0] = q_res.x;
-    res[1] = q_res.y;
-    res[2] = q_res.z;
+    res[0] = q_res[1];
+    res[1] = q_res[2];
+    res[2] = q_res[3];
 }
 
-void quaternion_rot_vec_inv(const quaternion_t *q, const float *vec, float *res) {
-    quaternion_t q_vec = {0.f, vec[0], vec[1], vec[2]}, q_conj = {q->w, -q->x, -q->y, -q->z}, q_res;
+void quaternion_rot_vec_inv(const float q[4], const float *vec, float *res) {
+    float q_vec[4] = {0.f, vec[0], vec[1], vec[2]}, q_conj[4] = {q[0], -q[1], -q[2], -q[3]}, q_res[4];
 
-    quaternion_mul(&q_conj, &q_vec, &q_vec);
-    quaternion_mul(&q_vec, q, &q_res);
+    quaternion_mul(q_conj, q_vec, q_vec);
+    quaternion_mul(q_vec, q, q_res);
 
-    res[0] = q_res.x;
-    res[1] = q_res.y;
-    res[2] = q_res.z;
+    res[0] = q_res[1];
+    res[1] = q_res[2];
+    res[2] = q_res[3];
 }
 
-void quaternion_to_euler(const quaternion_t *q, float *roll, float *pitch, float *yaw) {
-    *roll = atan2f(2.f * ((q->y * q->z) - (q->w * q->x)), 1.f - 2.f * ((q->x * q->x) + (q->y * q->y)));
-    *pitch = asinf(-2.f * ((q->w * q->y) + (q->x * q->z)));
-    *yaw = atan2f(2.f * ((q->x * q->y) - (q->w * q->z)), 1.f - 2.f * ((q->y * q->y) + (q->z * q->z)));
+void quaternion_to_euler(const float q[4], float *roll, float *pitch, float *yaw) {
+    *roll = atan2f(2.f * ((q[2] * q[3]) - (q[0] * q[1])), 1.f - 2.f * ((q[1] * q[1]) + (q[2] * q[2])));
+    *pitch = asinf(-2.f * ((q[0] * q[2]) + (q[1] * q[3])));
+    *yaw = atan2f(2.f * ((q[1] * q[2]) - (q[0] * q[3])), 1.f - 2.f * ((q[2] * q[2]) + (q[3] * q[3])));
 }

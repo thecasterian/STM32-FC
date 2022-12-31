@@ -8,11 +8,6 @@ bool pwm_en;
 
 static volatile bool control_timer_flag;
 
-static struct {
-    uint32_t arr;
-    uint32_t ccr[4];
-} pwm_config;
-
 void control_timer_start(void) {
     HAL_TIM_Base_Start_IT(CONTROL_HTIM);
 }

@@ -20,10 +20,8 @@ typedef struct {
 
 extern float acc[3], ang[3], mag[3];
 extern float acc_raw[3], ang_raw[3], mag_raw[3];
-extern quaternion_t q;
-extern float rpy[3];
-extern quaternion_t q_meas;
-extern float rpy_meas[3];
+extern float q[4], rpy[3];
+extern float q_meas[4], rpy_meas[3];
 
 /* Is streaming enabled? */
 extern bool strm_en;

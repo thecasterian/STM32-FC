@@ -1,38 +1,13 @@
 /**
  * @file quaternion.h
  * @author Jeongu Kim (jeongukim@kaist.ac.kr)
- * @brief Quaternion library.
+ * @brief Quaternion library. A quaternion is reperesented as an array [w, x, y, z] where q = w + xi + yj + zk.
  *
  * @copyright (c) 2022 Jeongu Kim <jeongukim@kaist.ac.kr>
  */
 
 #ifndef QUATERNION_H
 #define QUATERNION_H
-
-/**
- * @brief Quaternion: q = w + xi + yj + zk.
- */
-typedef struct {
-    /** Real part. */
-    float w;
-    /** i-term. */
-    float x;
-    /** j-term. */
-    float y;
-    /** k-term. */
-    float z;
-} quaternion_t;
-
-/**
- * @brief Initializes the quaternion.
- *
- * @param[out] q Quaternion.
- * @param w Real part.
- * @param x i-term.
- * @param y j-term.
- * @param z k-term.
- */
-void quaternion_init(quaternion_t *q, float w, float x, float y, float z);
 
 /**
  * @brief Initializes the quaternion from the ZYX euler angle.
@@ -42,7 +17,7 @@ void quaternion_init(quaternion_t *q, float w, float x, float y, float z);
  * @param pitch Pitch angle (rad).
  * @param yaw Yaw angle (rad).
  */
-void quaternion_from_euler(quaternion_t *q, float roll, float pitch, float yaw);
+void quaternion_from_euler(float q[4], float roll, float pitch, float yaw);
 
 /**
  * @brief Scales the quaternion by a scalar.
@@ -51,7 +26,7 @@ void quaternion_from_euler(quaternion_t *q, float roll, float pitch, float yaw);
  * @param scale Scale factor.
  * @param[out] res Scaled quaternion.
  */
-void quaternion_scale(const quaternion_t *q, float scale, quaternion_t *res);
+void quaternion_scale(const float q[4], float scale, float res[4]);
 
 /**
  * @brief Normalizes the quaternion.
@@ -59,7 +34,7 @@ void quaternion_scale(const quaternion_t *q, float scale, quaternion_t *res);
  * @param[in] q Quaternion.
  * @param[out] res Normalized quaternion.
  */
-void quaternion_normalize(const quaternion_t *q, quaternion_t *res);
+void quaternion_normalize(const float q[4], float res[4]);
 
 /**
  * @brief Adds two quaternions.
@@ -68,7 +43,7 @@ void quaternion_normalize(const quaternion_t *q, quaternion_t *res);
  * @param[in] q2 Second quaternion.
  * @param[out] res Sum of the two quaternions.
  */
-void quaternion_add(const quaternion_t *q1, const quaternion_t *q2, quaternion_t *res);
+void quaternion_add(const float q1[4], const float q2[4], float res[4]);
 
 /**
  * @brief Multiplies two quaternions.
@@ -77,7 +52,7 @@ void quaternion_add(const quaternion_t *q1, const quaternion_t *q2, quaternion_t
  * @param[in] q2 Second quaternion.
  * @param[out] res Product of the two quaternions.
  */
-void quaternion_mul(const quaternion_t *q1, const quaternion_t *q2, quaternion_t *res);
+void quaternion_mul(const float q1[4], const float q2[4], float res[4]);
 
 /**
  * @brief Rotates the vector by the quaternion.
@@ -87,7 +62,7 @@ void quaternion_mul(const quaternion_t *q1, const quaternion_t *q2, quaternion_t
  * @param[in] vec Vector.
  * @param[out] res Rotated vector.
  */
-void quaternion_rot_vec(const quaternion_t *q, const float vec[3], float res[3]);
+void quaternion_rot_vec(const float q[4], const float vec[3], float res[3]);
 
 /**
  * @brief Rotates the vector by the inverse of the quaternion.
@@ -97,7 +72,7 @@ void quaternion_rot_vec(const quaternion_t *q, const float vec[3], float res[3])
  * @param[in] vec Vector.
  * @param[out] res Rotated vector.
  */
-void quaternion_rot_vec_inv(const quaternion_t *q, const float vec[3], float res[3]);
+void quaternion_rot_vec_inv(const float q[4], const float vec[3], float res[3]);
 
 /**
  * @brief Converts the quaternion to the ZYX euler angle.
@@ -107,6 +82,6 @@ void quaternion_rot_vec_inv(const quaternion_t *q, const float vec[3], float res
  * @param[out] pitch Pitch angle (rad).
  * @param[out] yaw Yaw angle (rad).
  */
-void quaternion_to_euler(const quaternion_t *q, float *roll, float *pitch, float *yaw);
+void quaternion_to_euler(const float q[4], float *roll, float *pitch, float *yaw);
 
 #endif

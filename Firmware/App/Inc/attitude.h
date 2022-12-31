@@ -19,6 +19,6 @@ void attitude_init(uint32_t num_sample);
  * @param[out] q_meas Quaternion from the measurements.
  * @param[out] rpy_meas Roll, pitch, yaw from the measurements.
  */
-void attitude_from_measurement(const float acc[3], const float mag[3], quaternion_t *q_meas, float rpy_meas[3]);
+void attitude_from_measurement(const float acc[3], const float mag[3], float q_meas[4], float rpy_meas[3]);
 
 #endif

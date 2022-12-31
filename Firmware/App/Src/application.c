@@ -123,5 +123,5 @@ static void calc_attitude(void) {
     mag[2] = -mag_ss_frm[2];
 
     /* Attitude estimation. */
-    attitude_from_measurement(acc, mag, &q_meas, rpy_meas);
+    attitude_from_measurement(acc, mag, q_meas, rpy_meas);
 }
