@@ -22,14 +22,31 @@ extern float acc[3], ang[3], mag[3];
 extern float acc_raw[3], ang_raw[3], mag_raw[3];
 extern float q[4], rpy[3];
 extern float q_meas[4], rpy_meas[3];
-
-/* Is streaming enabled? */
-extern bool strm_en;
-/* Is streaming data selected? */
-extern bool strm_dat_sel[DAT_END - DAT_START];
+extern float P[16], Q[16], R[36];
 
 extern const strm_dat_t strm_dat_list[DAT_END - DAT_START];
 
+/**
+ * @brief Starts the streaming.
+ */
+void streaming_start(void);
+
+/**
+ * @brief Stops the streaming.
+ */
+void streaming_stop(void);
+
+/**
+ * @brief Selects the streaming data.
+ *
+ * @param[in] data_id Array of data IDs.
+ * @param num_data Number of data.
+ */
+void streaming_select_data(const uint8_t data_id[], uint16_t num_data);
+
+/**
+ * @brief Sends the streaming data if the streaming is enabled.
+ */
 void streaming_send(void);
 
 #endif

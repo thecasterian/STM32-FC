@@ -42,18 +42,21 @@
 #define ERR_ARG_INVAL 0xE6
 
 #define DAT_START 0x10
-#define DAT_END   0x2A
+#define DAT_END   0x33
 
-#define DAT_ACC          0x10
-#define DAT_ANG          0x11
-#define DAT_MAG          0x12
-#define DAT_RAW_ACC      0x18
-#define DAT_RAW_GYRO     0x19
-#define DAT_RAW_MAG      0x1A
-#define DAT_KF_QUAT      0x20
-#define DAT_KF_RPY       0x21
-#define DAT_MEAS_QUAT    0x28
-#define DAT_MEAS_RPY     0x29
+#define DAT_ACC       0x10
+#define DAT_ANG       0x11
+#define DAT_MAG       0x12
+#define DAT_RAW_ACC   0x18
+#define DAT_RAW_GYRO  0x19
+#define DAT_RAW_MAG   0x1A
+#define DAT_KF_QUAT   0x20
+#define DAT_KF_RPY    0x21
+#define DAT_MEAS_QUAT 0x28
+#define DAT_MEAS_RPY  0x29
+#define DAT_COV_STATE 0x30
+#define DAT_COV_PROC  0x31
+#define DAT_COV_MEAS  0x32
 
 #define LEN_MAX 255
 

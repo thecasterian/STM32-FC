@@ -12,13 +12,8 @@
 void attitude_init(uint32_t num_sample);
 
 /**
- * @brief Gets the attitude from the accelerometer and magnetometer measurements.
- *
- * @param[in] acc Acceleration.
- * @param[in] mag Magnetic field.
- * @param[out] q_meas Quaternion from the measurements.
- * @param[out] rpy_meas Roll, pitch, yaw from the measurements.
+ * @brief Updates the attitude from the measurements.
  */
-void attitude_from_measurement(const float acc[3], const float mag[3], float q_meas[4], float rpy_meas[3]);
+void attitude_update(void);
 
 #endif

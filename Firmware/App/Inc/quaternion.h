@@ -78,10 +78,8 @@ void quaternion_rot_vec_inv(const float q[4], const float vec[3], float res[3]);
  * @brief Converts the quaternion to the ZYX euler angle.
  *
  * @param[in] q Quaternion.
- * @param[out] roll Roll angle (rad).
- * @param[out] pitch Pitch angle (rad).
- * @param[out] yaw Yaw angle (rad).
+ * @param[out] rpy Array of roll, pitch, and yaw angles (rad).
  */
-void quaternion_to_euler(const float q[4], float *roll, float *pitch, float *yaw);
+void quaternion_to_euler(const float q[4], float rpy[3]);
 
 #endif

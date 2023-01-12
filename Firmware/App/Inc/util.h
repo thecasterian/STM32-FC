@@ -21,5 +21,6 @@ void memcpy_to_volatile(volatile uint8_t *dst, const uint8_t *src, uint16_t size
 void memcpy_from_volatile(uint8_t *dst, const volatile uint8_t *src, uint16_t size);
 
 float norm2(float x, float y);
+float norm3(float x, float y, float z);
 
 #endif

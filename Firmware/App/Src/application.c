@@ -23,8 +23,6 @@ static void standby(void);
 static void flight(void);
 static void emer(void);
 
-static void calc_attitude(void);
-
 void setup(void) {
     const pwm_channel_t motor_pwm_mapping[4] = {
         PWM_CHANNEL_1,
@@ -84,44 +82,17 @@ void loop(void) {
 }
 
 static void standby(void) {
-    calc_attitude();
+    attitude_update();
 
     streaming_send();
 }
 
 static void flight(void) {
-    calc_attitude();
+    attitude_update();
 }
 
 static void emer(void) {
     const float throttle_zero[4] = {0.f, 0.f, 0.f, 0.f};
 
     esc_set_throttle(throttle_zero);
-}
-
-static void calc_attitude(void) {
-    float acc_ss_frm[3], ang_ss_frm[3], mag_ss_frm[3];
-
-    bmi088_read_acc(acc_raw);
-    bmi088_read_gyro(ang_raw);
-    lis2mdl_read_mag(mag_raw);
-
-    /* Calibrate. */
-    calib_acc(acc_raw, acc_ss_frm);
-    calib_gyro(ang_raw, ang_ss_frm);
-    calib_mag(mag_raw, mag_ss_frm);
-
-    /* Change axes from the sensor frame to the FC frame. */
-    acc[0] = -acc_ss_frm[0];
-    acc[1] = acc_ss_frm[1];
-    acc[2] = -acc_ss_frm[2];
-    ang[0] = -ang_ss_frm[0];
-    ang[1] = ang_ss_frm[1];
-    ang[2] = -ang_ss_frm[2];
-    mag[0] = -mag_ss_frm[1];
-    mag[1] = mag_ss_frm[0];
-    mag[2] = -mag_ss_frm[2];
-
-    /* Attitude estimation. */
-    attitude_from_measurement(acc, mag, q_meas, rpy_meas);
 }

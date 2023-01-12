@@ -66,7 +66,7 @@ void quaternion_mul(const float q1[4], const float q2[4], float res[4]) {
     memcpy(res, tmp, 4U * sizeof(float));
 }
 
-void quaternion_rot_vec(const float q[4], const float *vec, float *res) {
+void quaternion_rot_vec(const float q[4], const float vec[3], float res[3]) {
     float q_vec[4] = {0.f, vec[0], vec[1], vec[2]}, q_conj[4] = {q[0], -q[1], -q[2], -q[3]}, q_res[4];
 
     quaternion_mul(q, q_vec, q_vec);
@@ -77,7 +77,7 @@ void quaternion_rot_vec(const float q[4], const float *vec, float *res) {
     res[2] = q_res[3];
 }
 
-void quaternion_rot_vec_inv(const float q[4], const float *vec, float *res) {
+void quaternion_rot_vec_inv(const float q[4], const float vec[3], float res[3]) {
     float q_vec[4] = {0.f, vec[0], vec[1], vec[2]}, q_conj[4] = {q[0], -q[1], -q[2], -q[3]}, q_res[4];
 
     quaternion_mul(q_conj, q_vec, q_vec);
@@ -88,8 +88,8 @@ void quaternion_rot_vec_inv(const float q[4], const float *vec, float *res) {
     res[2] = q_res[3];
 }
 
-void quaternion_to_euler(const float q[4], float *roll, float *pitch, float *yaw) {
-    *roll = atan2f(2.f * ((q[2] * q[3]) - (q[0] * q[1])), 1.f - 2.f * ((q[1] * q[1]) + (q[2] * q[2])));
-    *pitch = asinf(-2.f * ((q[0] * q[2]) + (q[1] * q[3])));
-    *yaw = atan2f(2.f * ((q[1] * q[2]) - (q[0] * q[3])), 1.f - 2.f * ((q[2] * q[2]) + (q[3] * q[3])));
+void quaternion_to_euler(const float q[4], float rpy[3]) {
+    rpy[0] = atan2f(2.f * ((q[2] * q[3]) - (q[0] * q[1])), 1.f - 2.f * ((q[1] * q[1]) + (q[2] * q[2])));
+    rpy[1] = asinf(-2.f * ((q[0] * q[2]) + (q[1] * q[3])));
+    rpy[2] = atan2f(2.f * ((q[1] * q[2]) - (q[0] * q[3])), 1.f - 2.f * ((q[2] * q[2]) + (q[3] * q[3])));
 }

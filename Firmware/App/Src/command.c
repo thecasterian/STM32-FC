@@ -95,13 +95,7 @@ static uint8_t cmd_hdl_strm_dat(const uint8_t arg[], uint8_t arglen) {
     }
 
     if (err == ERR_OK) {
-        for (uint16_t i = 0U; i < DAT_END - DAT_START; i++) {
-            strm_dat_sel[i] = false;
-        }
-
-        for (uint16_t i = 0U; i < arglen; i++) {
-            strm_dat_sel[arg[i] - DAT_START] = true;
-        }
+        streaming_select_data(arg, arglen);
     }
 
     return err;
@@ -115,7 +109,11 @@ static uint8_t cmd_hdl_strm(const uint8_t arg[], uint8_t arglen) {
     } else if (!is_boolean_u8(arg[0])) {
         err = ERR_ARG_INVAL;
     } else {
-        strm_en = arg[0];
+        if (arg[0] == 1U) {
+            streaming_start();
+        } else {
+            streaming_stop();
+        }
         err = ERR_OK;
     }
 

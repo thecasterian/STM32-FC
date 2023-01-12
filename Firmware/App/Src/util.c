@@ -28,3 +28,7 @@ void memcpy_from_volatile(uint8_t *dst, const volatile uint8_t *src, uint16_t si
 float norm2(float x, float y) {
     return sqrtf((x * x) + (y * y));
 }
+
+float norm3(float x, float y, float z) {
+    return sqrtf((x * x) + (y * y) + (z * z));
+}
