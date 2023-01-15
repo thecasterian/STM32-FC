@@ -1,4 +1,5 @@
 #include <math.h>
+#include <string.h>
 #include "attitude.h"
 #include "bmi088.h"
 #include "calib.h"
@@ -27,6 +28,7 @@ static float sa, ca;
 
 static void measure(void);
 static void kalman_filter(void);
+static void measurement_to_attitude(const float acc[3], const float mag[3], float rpy[3]);
 static void attitude_to_measurement(const float q_est[4], float z[6]);
 static void attitude_to_measurement_jacobian(const float q_est[4], float H[24]);
 
@@ -34,8 +36,6 @@ void attitude_init(uint32_t num_sample) {
     uint32_t cnt;
     float acc_raw[3], acc_ss_frm[3], acc[3], acc_sum[3] = {0.f};
     float mag_raw[3], mag_ss_frm[3], mag[3], mag_sum[3] = {0.f};
-    float q_acc[4], mag_acc[3];
-    float roll, pitch, yaw;
 
     cnt = 0U;
     while (cnt < num_sample) {
@@ -71,24 +71,24 @@ void attitude_init(uint32_t num_sample) {
     }
 
     /* Initial value of quaternion. */
-    roll = atan2f(-acc[1], -acc[2]);
-    pitch = atan2f(acc[0], norm2(acc[1], acc[2]));
-    quaternion_from_euler(q_acc, roll, pitch, 0.f);
-
-    /* Magnetic field in inertial frame. */
-    quaternion_rot_vec_inv(q_acc, mag, mag_acc);
-    yaw = atan2f(-mag_acc[1], mag_acc[0]);
+    measurement_to_attitude(acc, mag, rpy);
 
     /* Initial quaternion and RPY. */
-    quaternion_from_euler(q, roll, pitch, yaw);
-    rpy[0] = roll;
-    rpy[1] = pitch;
-    rpy[2] = yaw;
+    quaternion_from_euler(q, rpy);
+    memcpy(q_meas, q, sizeof(q_meas));
+    memcpy(rpy_meas, rpy, sizeof(rpy_meas));
 
-    /* Inclination angle. */
-    alpha = atan2f(mag_acc[2], norm2(mag_acc[0], mag_acc[1]));
-    sa = sinf(alpha);
-    ca = cosf(alpha);
+    /* Initialize covariance matrix. */
+    P[ 0] = 0.1f;
+    P[ 5] = 0.1f;
+    P[10] = 0.1f;
+    P[15] = 0.1f;
+    R[ 0] = SIGMA_A * SIGMA_A;
+    R[ 7] = SIGMA_A * SIGMA_A;
+    R[14] = SIGMA_A * SIGMA_A;
+    R[21] = SIGMA_M * SIGMA_M;
+    R[28] = SIGMA_M * SIGMA_M;
+    R[35] = SIGMA_M * SIGMA_M;
 }
 
 void attitude_update(void) {
@@ -118,6 +118,9 @@ static void measure(void) {
     mag[0] = -mag_ss_frm[1];
     mag[1] = mag_ss_frm[0];
     mag[2] = -mag_ss_frm[2];
+
+    measurement_to_attitude(acc, mag, rpy_meas);
+    quaternion_from_euler(q_meas, rpy_meas);
 }
 
 static void kalman_filter(void) {
@@ -164,17 +167,6 @@ static void kalman_filter(void) {
 
     matrix_mul(J_f, J_f_T, 4, 3, 4, Q);
     matrix_mul_scalar(Q, SIGMA_OMEGA * SIGMA_OMEGA, 4, 4, Q);
-    for (int16_t i = 0; i < 6; i++) {
-        for (int16_t j = 0; j < 6; j++) {
-            R[i * 6 + j] = 0.f;
-        }
-    }
-    R[ 0] = SIGMA_A * SIGMA_A;
-    R[ 7] = SIGMA_A * SIGMA_A;
-    R[14] = SIGMA_A * SIGMA_A;
-    R[21] = SIGMA_M * SIGMA_M;
-    R[28] = SIGMA_M * SIGMA_M;
-    R[35] = SIGMA_M * SIGMA_M;
 
     /* Estimate. */
     matrix_mul(A, q, 4, 4, 1, q_est);
@@ -203,6 +195,22 @@ static void kalman_filter(void) {
 
     quaternion_normalize(q, q);
     quaternion_to_euler(q, rpy);
+}
+
+static void measurement_to_attitude(const float acc[3], const float mag[3], float rpy[3]) {
+    float q_acc[4], mag_acc[3];
+
+    rpy[0] = atan2f(-acc[1], -acc[2]);
+    rpy[1] = atan2f(acc[0], norm2(acc[1], acc[2]));
+    rpy[2] = 0.f;
+    quaternion_from_euler(q_acc, rpy);
+
+    quaternion_rot_vec_inv(q_acc, mag, mag_acc);
+    rpy[2] = atan2f(-mag_acc[1], mag_acc[0]);
+
+    alpha = atan2f(mag_acc[2], norm2(mag_acc[0], mag_acc[1]));
+    sa = sinf(alpha);
+    ca = cosf(alpha);
 }
 
 static void attitude_to_measurement(const float q_est[4], float z[6]) {

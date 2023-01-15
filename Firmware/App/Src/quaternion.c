@@ -2,17 +2,17 @@
 #include <string.h>
 #include "quaternion.h"
 
-void quaternion_from_euler(float q[4], float roll, float pitch, float yaw)
+void quaternion_from_euler(float q[4], const float rpy[3])
 {
     float cr, cp, cy, sr, sp, sy;
 
-    cr = cosf(roll / 2.f);
-    cp = cosf(pitch / 2.f);
-    cy = cosf(yaw / 2.f);
+    cr = cosf(rpy[0] / 2.f);
+    cp = cosf(rpy[1] / 2.f);
+    cy = cosf(rpy[2] / 2.f);
 
-    sr = sinf(roll / 2.f);
-    sp = sinf(pitch / 2.f);
-    sy = sinf(yaw / 2.f);
+    sr = sinf(rpy[0] / 2.f);
+    sp = sinf(rpy[1] / 2.f);
+    sy = sinf(rpy[2] / 2.f);
 
     q[0] = cr * cp * cy + sr * sp * sy;
     q[1] = cr * sp * sy - sr * cp * cy;

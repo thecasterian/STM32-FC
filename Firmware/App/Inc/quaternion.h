@@ -13,11 +13,9 @@
  * @brief Initializes the quaternion from the ZYX euler angle.
  *
  * @param[out] q Quaternion.
- * @param roll Roll angle (rad).
- * @param pitch Pitch angle (rad).
- * @param yaw Yaw angle (rad).
+ * @param[in] roll Array of roll, pitch, and yaw angles (rad).
  */
-void quaternion_from_euler(float q[4], float roll, float pitch, float yaw);
+void quaternion_from_euler(float q[4], const float rpy[3]);
 
 /**
  * @brief Scales the quaternion by a scalar.
