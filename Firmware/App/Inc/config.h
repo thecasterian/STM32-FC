@@ -10,14 +10,21 @@
 #define CONFIG_H
 
 ///@{
+/** Accelerometer bias. */
+#define ACC_BIAS_X (0.0113836160f)
+#define ACC_BIAS_Y (0.0813763646f)
+#define ACC_BIAS_Z (0.0812100636f)
+///@}
+
+/** Accelerometer scale. */
+#define ACC_SCALE (0.9964445827f)
+
+///@{
 /** Gyro bias. */
 #define GYRO_BIAS_X ( 4.31881460e-03f)
 #define GYRO_BIAS_Y (-3.06885352e-03f)
 #define GYRO_BIAS_Z (-6.71779391e-04f)
 ///@}
-
-/** Heuristic drift reduction increment. */
-#define GYRO_HDR_INC 0.0001f
 
 ///@{
 /** Magnetometer soft iron calibration matrix. */
@@ -35,5 +42,14 @@
 #define MAG_HARD_IRON_Y (-609.94047391f)
 #define MAG_HARD_IRON_Z ( 243.05037387f)
 ///@}
+
+/** Standard deviation of the initial quaternion. */
+#define STD_INIT_QUAT (0.01f)
+/** Standard deviation of the accelerometer normalized. */
+#define STD_ACC (0.0043250547f)
+/** Standard deviation of the gyro. */
+#define STD_GYRO (0.0039276887f)
+/** Standard deviation of the magnetometer normalized. */
+#define STD_MAG (0.0039383023f)
 
 #endif

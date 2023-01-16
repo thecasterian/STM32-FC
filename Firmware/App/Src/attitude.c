@@ -3,6 +3,7 @@
 #include "attitude.h"
 #include "bmi088.h"
 #include "calib.h"
+#include "config.h"
 #include "lis2mdl.h"
 #include "matrix.h"
 #include "streaming.h"
@@ -11,10 +12,6 @@
 
 #define DT  .001f
 #define DT2 .0005f
-
-#define SIGMA_OMEGA 0.3f
-#define SIGMA_A 0.5f
-#define SIGMA_M 0.8f
 
 #define qw (q_est[0])
 #define qx (q_est[1])
@@ -79,16 +76,16 @@ void attitude_init(uint32_t num_sample) {
     memcpy(rpy_meas, rpy, sizeof(rpy_meas));
 
     /* Initialize covariance matrix. */
-    P[ 0] = 0.1f;
-    P[ 5] = 0.1f;
-    P[10] = 0.1f;
-    P[15] = 0.1f;
-    R[ 0] = SIGMA_A * SIGMA_A;
-    R[ 7] = SIGMA_A * SIGMA_A;
-    R[14] = SIGMA_A * SIGMA_A;
-    R[21] = SIGMA_M * SIGMA_M;
-    R[28] = SIGMA_M * SIGMA_M;
-    R[35] = SIGMA_M * SIGMA_M;
+    P[ 0] = STD_INIT_QUAT * STD_INIT_QUAT;
+    P[ 5] = STD_INIT_QUAT * STD_INIT_QUAT;
+    P[10] = STD_INIT_QUAT * STD_INIT_QUAT;
+    P[15] = STD_INIT_QUAT * STD_INIT_QUAT;
+    R[ 0] = STD_ACC * STD_ACC;
+    R[ 7] = STD_ACC * STD_ACC;
+    R[14] = STD_ACC * STD_ACC;
+    R[21] = STD_MAG * STD_MAG;
+    R[28] = STD_MAG * STD_MAG;
+    R[35] = STD_MAG * STD_MAG;
 }
 
 void attitude_update(void) {
@@ -166,7 +163,7 @@ static void kalman_filter(void) {
     matrix_transpose(J_f, 4, 3, J_f_T);
 
     matrix_mul(J_f, J_f_T, 4, 3, 4, Q);
-    matrix_mul_scalar(Q, SIGMA_OMEGA * SIGMA_OMEGA, 4, 4, Q);
+    matrix_mul_scalar(Q, STD_GYRO * STD_GYRO, 4, 4, Q);
 
     /* Estimate. */
     matrix_mul(A, q, 4, 4, 1, q_est);

@@ -3,11 +3,6 @@
 #include "calib.h"
 #include "config.h"
 
-static const float gyro_bias[3] = {
-    GYRO_BIAS_X,
-    GYRO_BIAS_Y,
-    GYRO_BIAS_Z,
-};
 static const float magcal_a[3][3] = {
     {MAG_SOFT_IRON_XX, MAG_SOFT_IRON_XY, MAG_SOFT_IRON_XZ},
     {MAG_SOFT_IRON_XY, MAG_SOFT_IRON_YY, MAG_SOFT_IRON_YZ},
@@ -20,26 +15,15 @@ static const float magcal_b[3] = {
 };
 
 void calib_acc(const float acc_raw[3], float acc[3]) {
-    /* No calibration is done yet. */
-    acc[0] = acc_raw[0];
-    acc[1] = acc_raw[1];
-    acc[2] = acc_raw[2];
+    acc[0] = ACC_SCALE * (acc_raw[0] - ACC_BIAS_X);
+    acc[1] = ACC_SCALE * (acc_raw[1] - ACC_BIAS_Y);
+    acc[2] = ACC_SCALE * (acc_raw[2] - ACC_BIAS_Z);
 }
 
 void calib_gyro(const float ang_raw[3], float ang[3]) {
-    static float ang_prev[3], integrator[3];
-
-    /* Heuristic drift reduction. */
-    for (int16_t i = 0; i < 3; i++) {
-        if (ang_prev[i] > 0.f) {
-            integrator[i] -= GYRO_HDR_INC;
-        } else if (ang_prev[i] < 0.f) {
-            integrator[i] += GYRO_HDR_INC;
-        } else {}
-
-        ang[i] = ang_raw[i] - gyro_bias[i] + integrator[i];
-        ang_prev[i] = ang[i];
-    }
+    ang[0] = ang_raw[0] - GYRO_BIAS_X;
+    ang[1] = ang_raw[1] - GYRO_BIAS_Y;
+    ang[2] = ang_raw[2] - GYRO_BIAS_Z;
 }
 
 void calib_mag(const float mag_raw[3], float mag[3]) {

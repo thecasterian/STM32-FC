@@ -71,7 +71,7 @@ static uint8_t cmd_hdl_led_green(const uint8_t arg[], uint8_t arglen) {
 static uint8_t cmd_hdl_led_blue(const uint8_t arg[], uint8_t arglen) {
     uint8_t err;
 
-    if (arglen != 2U) {
+    if (arglen != 1U) {
         err = ERR_LEN_INVAL;
     } else if (!is_boolean_u8(arg[0])) {
         err = ERR_ARG_INVAL;
