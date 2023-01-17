@@ -52,4 +52,9 @@
 /** Standard deviation of the magnetometer normalized. */
 #define STD_MAG (0.0039383023f)
 
+/** Acceleration HPF cut-off frequency (Hz). */
+#define ACC_HPF_CUTOFF_FREQ (10.f)
+/** External acceleration compensation coefficient. */
+#define EXT_ACC_COMPEN_COEFF (4.f)
+
 #endif

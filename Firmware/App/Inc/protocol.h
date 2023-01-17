@@ -42,7 +42,7 @@
 #define ERR_ARG_INVAL 0xE6
 
 #define DAT_START 0x10
-#define DAT_END   0x33
+#define DAT_END   0x39
 
 #define DAT_ACC       0x10
 #define DAT_ANG       0x11
@@ -57,6 +57,7 @@
 #define DAT_COV_STATE 0x30
 #define DAT_COV_PROC  0x31
 #define DAT_COV_MEAS  0x32
+#define DAT_HPF_ACC   0x38
 
 #define LEN_MAX 255
 
