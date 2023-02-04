@@ -148,7 +148,7 @@ static uint8_t cmd_hdl_throt(const uint8_t arg[], uint8_t arglen) {
         err = ERR_LEN_INVAL;
     } else {
         for (int16_t i = 0; i < 4; i++) {
-            throttle[i] = pack2(arg[2 * i + 1], arg[2 * i]) / 10000.f;
+            throttle[i] = (float)pack2(arg[2 * i + 1], arg[2 * i]) / 10000.f;
 
             if ((throttle[i] < 0.f) || (throttle[i] > 1.f)) {
                 err = ERR_ARG_INVAL;

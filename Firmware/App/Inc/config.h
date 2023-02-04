@@ -43,18 +43,20 @@
 #define MAG_HARD_IRON_Z ( 243.05037387f)
 ///@}
 
+/** IIR filter coefficient of the acceleration. */
+#define IIR_COEFF_ACC (0.99f)
+/** IIR filter coefficient of the angular veloctiy. */
+#define IIR_COEFF_ANG (0.1f)
+/** IIR filter coefficient of the magnetic field. */
+#define IIR_COEFF_MAG (0.1f)
+
 /** Standard deviation of the initial quaternion. */
 #define STD_INIT_QUAT (0.01f)
 /** Standard deviation of the accelerometer normalized. */
-#define STD_ACC (0.0043250547f)
+#define STD_ACC (0.5f)
 /** Standard deviation of the gyro. */
-#define STD_GYRO (0.0039276887f)
+#define STD_GYRO (0.3f)
 /** Standard deviation of the magnetometer normalized. */
-#define STD_MAG (0.0039383023f)
-
-/** Acceleration HPF cut-off frequency (Hz). */
-#define ACC_HPF_CUTOFF_FREQ (10.f)
-/** External acceleration compensation coefficient. */
-#define EXT_ACC_COMPEN_COEFF (4.f)
+#define STD_MAG (0.8f)
 
 #endif

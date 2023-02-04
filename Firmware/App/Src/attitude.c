@@ -24,9 +24,6 @@ static float alpha;
 /* Sine and cosine of the inclination angle. */
 static float sa, ca;
 
-/* HPF coefficient. */
-static const float hpf_coeff = 1.f / (2.f * PI * DT * ACC_HPF_CUTOFF_FREQ + 1.f);
-
 static void measure(void);
 static void kalman_filter(void);
 static void measurement_to_attitude(const float acc[3], const float mag[3], float rpy[3]);
@@ -93,7 +90,7 @@ void attitude_update(void) {
 
 static void measure(void) {
     float acc_ss_frm[3], ang_ss_frm[3], mag_ss_frm[3];
-    static float acc_prv[3], acc_hpf_prv[3];
+    static float acc_prv[3], ang_prv[3], mag_prv[3];
 
     bmi088_read_acc(acc_raw);
     bmi088_read_gyro(ang_raw);
@@ -115,16 +112,21 @@ static void measure(void) {
     mag[1] = mag_ss_frm[0];
     mag[2] = -mag_ss_frm[2];
 
+    /* IIR filters. */
+    for (int16_t i = 0; i < 3; i++) {
+        acc[i] = acc[i] * (1.f - IIR_COEFF_ACC) + acc_prv[i] * IIR_COEFF_ACC;
+        ang[i] = ang[i] * (1.f - IIR_COEFF_ANG) + ang_prv[i] * IIR_COEFF_ANG;
+        mag[i] = mag[i] * (1.f - IIR_COEFF_MAG) + mag_prv[i] * IIR_COEFF_MAG;
+    }
+    for (int16_t i = 0; i < 3; i++) {
+        acc_prv[i] = acc[i];
+        ang_prv[i] = ang[i];
+        mag_prv[i] = mag[i];
+    }
+
     /* Calculate the quaternion and RPY with the measurements. */
     measurement_to_attitude(acc, mag, rpy_meas);
     quaternion_from_euler(q_meas, rpy_meas);
-
-    /* Acceleration HPF. */
-    for (int i = 0; i < 3; i++) {
-        acc_hpf[i] = hpf_coeff * (acc_hpf_prv[i] + acc[i] - acc_prv[i]);
-        acc_prv[i] = acc[i];
-        acc_hpf_prv[i] = acc_hpf[i];
-    }
 }
 
 static void kalman_filter(void) {
@@ -171,9 +173,9 @@ static void kalman_filter(void) {
 
     matrix_mul(J_f, J_f_T, 4, 3, 4, Q);
     matrix_mul_scalar(Q, STD_GYRO * STD_GYRO, 4, 4, Q);
-    R[ 0] = STD_ACC * STD_ACC + EXT_ACC_COMPEN_COEFF * acc_hpf[0] * acc_hpf[0] / (acc_norm * acc_norm);
-    R[ 7] = STD_ACC * STD_ACC + EXT_ACC_COMPEN_COEFF * acc_hpf[1] * acc_hpf[1] / (acc_norm * acc_norm);
-    R[14] = STD_ACC * STD_ACC + EXT_ACC_COMPEN_COEFF * acc_hpf[2] * acc_hpf[2] / (acc_norm * acc_norm);
+    R[ 0] = STD_ACC * STD_ACC;
+    R[ 7] = STD_ACC * STD_ACC;
+    R[14] = STD_ACC * STD_ACC;
     R[21] = STD_MAG * STD_MAG;
     R[28] = STD_MAG * STD_MAG;
     R[35] = STD_MAG * STD_MAG;

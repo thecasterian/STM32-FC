@@ -9,7 +9,6 @@ float acc_raw[3], ang_raw[3], mag_raw[3];
 float q[4], rpy[3];
 float q_meas[4], rpy_meas[3];
 float P[16], Q[16], R[36];
-float acc_hpf[3];
 float rf_ch[16];
 
 /* List of streaming data. */
@@ -27,7 +26,6 @@ const strm_dat_t strm_dat_list[DAT_END - DAT_START] = {
     STRM_DAT_LIST_INIT( DAT_COV_STATE, P,         64U ),
     STRM_DAT_LIST_INIT( DAT_COV_PROC,  Q,         64U ),
     STRM_DAT_LIST_INIT( DAT_COV_MEAS,  R,        144U ),
-    STRM_DAT_LIST_INIT( DAT_HPF_ACC,   acc_hpf,   12U ),
     STRM_DAT_LIST_INIT( DAT_RF_CH1,    &rf_ch[0],  4U ),
     STRM_DAT_LIST_INIT( DAT_RF_CH2,    &rf_ch[1],  4U ),
     STRM_DAT_LIST_INIT( DAT_RF_CH3,    &rf_ch[2],  4U ),
