@@ -10,6 +10,7 @@ float q[4], rpy[3];
 float q_meas[4], rpy_meas[3];
 float P[16], Q[16], R[36];
 float acc_hpf[3];
+float rf_ch[16];
 
 /* List of streaming data. */
 const strm_dat_t strm_dat_list[DAT_END - DAT_START] = {
@@ -27,6 +28,22 @@ const strm_dat_t strm_dat_list[DAT_END - DAT_START] = {
     STRM_DAT_LIST_INIT( DAT_COV_PROC,  Q,         64U ),
     STRM_DAT_LIST_INIT( DAT_COV_MEAS,  R,        144U ),
     STRM_DAT_LIST_INIT( DAT_HPF_ACC,   acc_hpf,   12U ),
+    STRM_DAT_LIST_INIT( DAT_RF_CH1,    &rf_ch[0],  4U ),
+    STRM_DAT_LIST_INIT( DAT_RF_CH2,    &rf_ch[1],  4U ),
+    STRM_DAT_LIST_INIT( DAT_RF_CH3,    &rf_ch[2],  4U ),
+    STRM_DAT_LIST_INIT( DAT_RF_CH4,    &rf_ch[3],  4U ),
+    STRM_DAT_LIST_INIT( DAT_RF_CH5,    &rf_ch[4],  4U ),
+    STRM_DAT_LIST_INIT( DAT_RF_CH6,    &rf_ch[5],  4U ),
+    STRM_DAT_LIST_INIT( DAT_RF_CH7,    &rf_ch[6],  4U ),
+    STRM_DAT_LIST_INIT( DAT_RF_CH8,    &rf_ch[7],  4U ),
+    STRM_DAT_LIST_INIT( DAT_RF_CH9,    &rf_ch[8],  4U ),
+    STRM_DAT_LIST_INIT( DAT_RF_CH10,   &rf_ch[9],  4U ),
+    STRM_DAT_LIST_INIT( DAT_RF_CH11,   &rf_ch[10], 4U ),
+    STRM_DAT_LIST_INIT( DAT_RF_CH12,   &rf_ch[11], 4U ),
+    STRM_DAT_LIST_INIT( DAT_RF_CH13,   &rf_ch[12], 4U ),
+    STRM_DAT_LIST_INIT( DAT_RF_CH14,   &rf_ch[13], 4U ),
+    STRM_DAT_LIST_INIT( DAT_RF_CH15,   &rf_ch[14], 4U ),
+    STRM_DAT_LIST_INIT( DAT_RF_CH16,   &rf_ch[15], 4U ),
 };
 
 /* Is streaming enabled? */

@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "application.h"
 #include "attitude.h"
 #include "bmi088.h"
@@ -7,21 +8,24 @@
 #include "lis2mdl.h"
 #include "main.h"
 #include "protocol.h"
+#include "sbus.h"
 #include "streaming.h"
 #include "tim_wrapper.h"
 
 typedef enum {
-    MODE_INIT    = 0x00,
-    MODE_STANDBY = 0x01,
-    MODE_FLIGHT  = 0x02,
-    MODE_EMER    = 0x03,
-} mode_t;
+    FC_MODE_INIT    = 0x00,
+    FC_MODE_STANDBY = 0x01,
+    FC_MODE_FLIGHT  = 0x02,
+    FC_MODE_EMER    = 0x03,
+} fc_mode_t;
 
-static mode_t mode = MODE_INIT;
+static fc_mode_t mode = FC_MODE_INIT;
 
 static void standby(void);
 static void flight(void);
 static void emer(void);
+
+uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len);
 
 void setup(void) {
     const pwm_channel_t motor_pwm_mapping[4] = {
@@ -34,6 +38,7 @@ void setup(void) {
     control_timer_start();
 
     packet_parser_init();
+    sbus_init();
 
     bmi088_init();
     bmi088_set_range(BMI088_ACC_RANGE_24G, BMI088_GYRO_RANGE_2000DPS);
@@ -47,22 +52,23 @@ void setup(void) {
     esc_set_motor_pwm_mapping(motor_pwm_mapping);
 
     /* Initialization end. */
-    mode = MODE_STANDBY;
+    mode = FC_MODE_STANDBY;
 }
 
 void loop(void) {
     packet_t packet;
     uint8_t err;
+    sbus_packet_t sbus_packet;
 
     if (control_timer_get_flag()) {
         switch (mode) {
-        case MODE_STANDBY:
+        case FC_MODE_STANDBY:
             standby();
             break;
-        case MODE_FLIGHT:
+        case FC_MODE_FLIGHT:
             flight();
             break;
-        case MODE_EMER:
+        case FC_MODE_EMER:
             emer();
             break;
         default:
@@ -72,12 +78,18 @@ void loop(void) {
         control_timer_clear_flag();
     }
 
-    if ((mode == MODE_STANDBY) && packet_receive(&packet)) {
+    if ((mode == FC_MODE_STANDBY) && packet_receive(&packet)) {
         err = packet_validate(&packet);
         if (err == ERR_OK) {
             err = command_execute(packet.dat[0], &packet.dat[1], packet.len - 1U);
         }
         response_send(err);
+    }
+
+    if (sbus_packet_receive(&sbus_packet)) {
+        for (uint16_t i = 0U; i < SBUS_CH_NUM; i++) {
+            rf_ch[i] = ((float)sbus_packet.ch[i] - SBUS_MIN) / (SBUS_MAX - SBUS_MIN);
+        }
     }
 }
 

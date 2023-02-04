@@ -11,6 +11,7 @@ typedef struct {
 } ringbuf_t;
 
 static ringbuf_t usb_ringbuf;
+static ringbuf_t sbus_ringbuf;
 
 static void ringbuf_push(ringbuf_t *ringbuf, uint8_t *buf, uint16_t size);
 static bool ringbuf_pop(ringbuf_t *ringbuf, uint8_t *buf, uint16_t size);
@@ -21,6 +22,14 @@ void usb_ringbuf_push(uint8_t *buf, uint16_t size) {
 
 bool usb_ringbuf_pop(uint8_t *buf, uint16_t size) {
     return ringbuf_pop(&usb_ringbuf, buf, size);
+}
+
+void sbus_ringbuf_push(uint8_t *buf, uint16_t size) {
+    ringbuf_push(&sbus_ringbuf, buf, size);
+}
+
+bool sbus_ringbuf_pop(uint8_t *buf, uint16_t size) {
+    return ringbuf_pop(&sbus_ringbuf, buf, size);
 }
 
 static void ringbuf_push(ringbuf_t *ringbuf, uint8_t *buf, uint16_t size) {

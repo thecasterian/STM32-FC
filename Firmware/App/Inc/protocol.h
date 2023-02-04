@@ -42,7 +42,7 @@
 #define ERR_ARG_INVAL 0xE6
 
 #define DAT_START 0x10
-#define DAT_END   0x39
+#define DAT_END   0x50
 
 #define DAT_ACC       0x10
 #define DAT_ANG       0x11
@@ -58,6 +58,22 @@
 #define DAT_COV_PROC  0x31
 #define DAT_COV_MEAS  0x32
 #define DAT_HPF_ACC   0x38
+#define DAT_RF_CH1    0x40
+#define DAT_RF_CH2    0x41
+#define DAT_RF_CH3    0x42
+#define DAT_RF_CH4    0x43
+#define DAT_RF_CH5    0x44
+#define DAT_RF_CH6    0x45
+#define DAT_RF_CH7    0x46
+#define DAT_RF_CH8    0x47
+#define DAT_RF_CH9    0x48
+#define DAT_RF_CH10   0x49
+#define DAT_RF_CH11   0x4A
+#define DAT_RF_CH12   0x4B
+#define DAT_RF_CH13   0x4C
+#define DAT_RF_CH14   0x4D
+#define DAT_RF_CH15   0x4E
+#define DAT_RF_CH16   0x4F
 
 #define LEN_MAX 255
 

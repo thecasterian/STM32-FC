@@ -24,6 +24,7 @@ extern float q[4], rpy[3];
 extern float q_meas[4], rpy_meas[3];
 extern float P[16], Q[16], R[36];
 extern float acc_hpf[3];
+extern float rf_ch[16];
 
 extern const strm_dat_t strm_dat_list[DAT_END - DAT_START];
 
