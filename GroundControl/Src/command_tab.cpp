@@ -1,13 +1,15 @@
 #include "command_tab.hpp"
 #include "ui_command_tab.h"
 
-CommandTab::CommandTab(QSerialPort *serial_port, QWidget *parent):
+CommandTab::CommandTab(PortManager *port_mgr, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::CommandTab),
-    serial_port(serial_port) {
+    port_mgr(port_mgr)
+{
     this->ui->setupUi(this);
 }
 
-CommandTab::~CommandTab() {
+CommandTab::~CommandTab()
+{
     delete this->ui;
 }

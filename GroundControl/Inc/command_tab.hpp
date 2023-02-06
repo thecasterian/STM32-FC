@@ -2,20 +2,22 @@
 #define COMMAND_TAB_HPP
 
 #include <QWidget>
-#include <QSerialPort>
+#include "port_manager.hpp"
 
-namespace Ui {
+namespace Ui
+{
 class CommandTab;
 }
 
-class CommandTab: public QWidget {
+class CommandTab : public QWidget
+{
 public:
-    explicit CommandTab(QSerialPort *serial_port, QWidget *parent = nullptr);
+    explicit CommandTab(PortManager *port_mgr, QWidget *parent = nullptr);
     ~CommandTab();
 
 private:
     Ui::CommandTab *ui;
-    QSerialPort *serial_port;
+    PortManager *port_mgr;
 };
 
 #endif

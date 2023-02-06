@@ -17,8 +17,10 @@ add_executable(${TARGET}
     Src/command_tab.cpp
     Src/main_window.cpp
     Src/main.cpp
-    Src/plotting_tab.cpp
-    Src/port_setting.cpp
+    Src/plot_manager.cpp
+    Src/plot_tab.cpp
+    Src/port_manager.cpp
+    Src/port_tab.cpp
 )
 
 target_include_directories(${TARGET} PUBLIC
