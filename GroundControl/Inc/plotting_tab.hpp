@@ -2,7 +2,9 @@
 #define PLOTTING_TAB_HPP
 
 #include <QWidget>
-#include "qwt_plot.h"
+#include <qwt_plot.h>
+#include <qwt_plot_grid.h>
+#include <qwt_plot_zoomer.h>
 
 namespace Ui {
 class PlottingTab;
@@ -16,6 +18,12 @@ public:
 private:
     Ui::PlottingTab *ui;
     QwtPlot *plot;
+    QwtPlotGrid *grid;
+    QwtPlotZoomer *zoom;
+
+private slots:
+    void on_showMajorGridCheckBox_toggled(bool checked);
+    void on_showMinorGridCheckBox_toggled(bool checked);
 };
 
 #endif

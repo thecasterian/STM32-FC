@@ -53,7 +53,7 @@ void MainWindow::on_portSearchPushButton_clicked(void) {
 void MainWindow::on_portConnectPushButton_clicked(void) {
     if (this->serial_port->isOpen()) {
         this->serial_port->close();
-        qDebug() << "port " << this->serial_port->portName() << " closed";
+        qDebug() << "port" << this->serial_port->portName() << "closed";
     } else {
         QString port_name = this->ui->portComboBox->currentText().trimmed();
         if (port_name.isEmpty()) {
@@ -61,12 +61,13 @@ void MainWindow::on_portConnectPushButton_clicked(void) {
             this->ui->portConnectPushButton->setChecked(false);
             return;
         }
+        qDebug() << port_name;
 
         QString buad_rate = this->port_setting->getBaudRate();
         bool baud_rate_ok = true;
         int buad_rate_int = buad_rate.toInt(&baud_rate_ok);
         if (!baud_rate_ok) {
-            qWarning() << "baud rate " << buad_rate << " is not a number";
+            qWarning() << "baud rate" << buad_rate << "is not a number";
             this->ui->portConnectPushButton->setChecked(false);
             return;
         }
@@ -75,13 +76,15 @@ void MainWindow::on_portConnectPushButton_clicked(void) {
         this->serial_port->setBaudRate(buad_rate_int);
 
         if (this->serial_port->open(QIODevice::ReadWrite)) {
+            qDebug() << "port" << this->serial_port->portName() << "opened";
         } else {
-            qWarning() << "port " << this->serial_port->portName() << " failed to open";
+            qWarning() << "port" << this->serial_port->portName() << "failed to open";
+            this->ui->portConnectPushButton->setChecked(false);
         }
     }
 }
 
 void MainWindow::readData(void) {
     QByteArray data = this->serial_port->readAll();
-    qDebug() << "read data: " << data;
+    qDebug() << "read data:" << data;
 }

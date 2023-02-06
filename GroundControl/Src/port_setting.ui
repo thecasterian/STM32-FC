@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Serial Port Settings</string>
   </property>
   <widget class="QLabel" name="baudRateLabel">
    <property name="geometry">
