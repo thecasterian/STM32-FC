@@ -4,9 +4,9 @@
 
 #define CONTROL_HTIM (&htim5)
 
-bool pwm_en;
-
 static volatile bool control_timer_flag;
+static volatile uint32_t control_timer_tick;
+static bool pwm_en;
 
 void control_timer_start(void) {
     HAL_TIM_Base_Start_IT(CONTROL_HTIM);
@@ -20,18 +20,28 @@ void control_timer_clear_flag(void) {
     control_timer_flag = false;
 }
 
+tim_tick_t control_timer_get_tick(void) {
+    return control_timer_tick;
+}
+
 void pwm_start(void) {
-    HAL_TIM_PWM_Start(CONTROL_HTIM, TIM_CHANNEL_1);
-    HAL_TIM_PWM_Start(CONTROL_HTIM, TIM_CHANNEL_2);
-    HAL_TIM_PWM_Start(CONTROL_HTIM, TIM_CHANNEL_3);
-    HAL_TIM_PWM_Start(CONTROL_HTIM, TIM_CHANNEL_4);
+    if (!pwm_en) {
+        HAL_TIM_PWM_Start(CONTROL_HTIM, TIM_CHANNEL_1);
+        HAL_TIM_PWM_Start(CONTROL_HTIM, TIM_CHANNEL_2);
+        HAL_TIM_PWM_Start(CONTROL_HTIM, TIM_CHANNEL_3);
+        HAL_TIM_PWM_Start(CONTROL_HTIM, TIM_CHANNEL_4);
+        pwm_en = true;
+    }
 }
 
 void pwm_stop(void) {
-    HAL_TIM_PWM_Stop(CONTROL_HTIM, TIM_CHANNEL_1);
-    HAL_TIM_PWM_Stop(CONTROL_HTIM, TIM_CHANNEL_2);
-    HAL_TIM_PWM_Stop(CONTROL_HTIM, TIM_CHANNEL_3);
-    HAL_TIM_PWM_Stop(CONTROL_HTIM, TIM_CHANNEL_4);
+    if (pwm_en) {
+        HAL_TIM_PWM_Stop(CONTROL_HTIM, TIM_CHANNEL_1);
+        HAL_TIM_PWM_Stop(CONTROL_HTIM, TIM_CHANNEL_2);
+        HAL_TIM_PWM_Stop(CONTROL_HTIM, TIM_CHANNEL_3);
+        HAL_TIM_PWM_Stop(CONTROL_HTIM, TIM_CHANNEL_4);
+        pwm_en = false;
+    }
 }
 
 void pwm_set_period(const uint32_t period[4]) {
@@ -44,5 +54,6 @@ void pwm_set_period(const uint32_t period[4]) {
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     if (htim == CONTROL_HTIM) {
         control_timer_flag = true;
+        control_timer_tick++;
     }
 }

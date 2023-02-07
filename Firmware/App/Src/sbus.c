@@ -1,6 +1,7 @@
 #include <string.h>
 #include "ring_buffer.h"
 #include "sbus.h"
+#include "tim_wrapper.h"
 #include "usart.h"
 
 #define SBUS_STX ((uint8_t)(0x0F))
@@ -8,15 +9,22 @@
 
 #define SBUS_CH_DAT_LEN 22U
 
+#define SBUS_EPS 16
+
 static struct {
     sbus_packet_t packet;
 
     bool stx;                                               /* Is STX found? */
     uint16_t cnt;                                           /* Number of received bytes. */
     uint8_t ch_dat[SBUS_CH_DAT_LEN];                        /* Channel data. */
+
+    tim_tick_t tick;                                        /* Tick of last received packet. */
 } parser;
 
 static uint8_t sbus_rx[1];
+
+static bool sbus_ch_is_min(uint16_t ch_val);
+static bool sbus_ch_is_max(uint16_t ch_val);
 
 void sbus_init(void) {
     HAL_UART_Receive_IT(&huart1, sbus_rx, sizeof(sbus_rx));
@@ -99,6 +107,8 @@ bool sbus_packet_receive(sbus_packet_t *packet) {
                 /* Copy packet. */
                 memcpy(packet, &parser.packet, sizeof(*packet));
 
+                parser.tick = control_timer_get_tick();
+
                 break;
             }
 
@@ -107,6 +117,61 @@ bool sbus_packet_receive(sbus_packet_t *packet) {
     }
 
     return res;
+}
+
+bool sbus_is_timeout(void) {
+    return (control_timer_get_tick() - parser.tick) >= SBUS_TIMEOUT_TICK;
+}
+
+bool sbus_packet_is_arming_pos(const sbus_packet_t *packet) {
+    static uint16_t arming_start_tick;
+    bool res;
+
+    if (!(sbus_ch_is_min(packet->ch[SBUS_THROTTLE_CH]) && sbus_ch_is_min(packet->ch[SBUS_RUDDER_CH]) &&
+          sbus_ch_is_min(packet->ch[SBUS_ELEVATOR_CH]) && sbus_ch_is_max(packet->ch[SBUS_AILERON_CH]))) {
+        arming_start_tick = control_timer_get_tick();
+        res = false;
+    } else {
+        res = (control_timer_get_tick() - arming_start_tick) >= SBUS_ARMING_TICK;
+    }
+
+    return res;
+}
+
+bool sbus_packet_is_disarming_pos(const sbus_packet_t *packet) {
+    static uint16_t disarming_start_tick;
+    bool res;
+
+    if (!(sbus_ch_is_min(packet->ch[SBUS_THROTTLE_CH]) && sbus_ch_is_max(packet->ch[SBUS_RUDDER_CH]) &&
+          sbus_ch_is_min(packet->ch[SBUS_ELEVATOR_CH]) && sbus_ch_is_min(packet->ch[SBUS_AILERON_CH]))) {
+        disarming_start_tick = control_timer_get_tick();
+        res = false;
+    } else {
+        res = (control_timer_get_tick() - disarming_start_tick) >= SBUS_DISARMING_TICK;
+    }
+
+    return res;
+}
+
+bool sbus_packet_is_emergency_switch_on(const sbus_packet_t *packet) {
+    return sbus_ch_is_max(packet->ch[SBUS_SH_CH]);
+}
+
+float sbus_ch_map_range(uint16_t ch_val, float min, float max) {
+    float val;
+
+    val = ((float)ch_val - SBUS_MIN) / (SBUS_MAX - SBUS_MIN);
+    val = (val * (max - min)) + min;
+
+    return val;
+}
+
+static bool sbus_ch_is_min(uint16_t ch_val) {
+    return ch_val < (SBUS_MIN + SBUS_EPS);
+}
+
+static bool sbus_ch_is_max(uint16_t ch_val) {
+    return ch_val > (SBUS_MAX - SBUS_EPS);
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {

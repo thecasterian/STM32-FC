@@ -14,14 +14,14 @@
 
 #define PWM_TIM_FREQ 84000000.f
 
+typedef uint32_t tim_tick_t;
+
 typedef enum {
     PWM_CHANNEL_1 = 0,
     PWM_CHANNEL_2 = 1,
     PWM_CHANNEL_3 = 2,
     PWM_CHANNEL_4 = 3,
 } pwm_channel_t;
-
-extern bool pwm_en;
 
 /**
  * @brief Starts the control timer.
@@ -37,6 +37,11 @@ bool control_timer_get_flag(void);
  * @brief Clears the period elapsed flag.
  */
 void control_timer_clear_flag(void);
+
+/**
+ * @brief Gets the current control timer tick.
+ */
+tim_tick_t control_timer_get_tick(void);
 
 /**
  * @brief Starts PWM output.
