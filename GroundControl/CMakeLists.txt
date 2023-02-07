@@ -17,6 +17,7 @@ add_executable(${TARGET}
     Src/command_tab.cpp
     Src/main_window.cpp
     Src/main.cpp
+    Src/packet_parser.cpp
     Src/plot_manager.cpp
     Src/plot_tab.cpp
     Src/port_manager.cpp

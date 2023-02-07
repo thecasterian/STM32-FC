@@ -1,7 +1,9 @@
 #ifndef PORT_MANAGER_HPP
 #define PORT_MANAGER_HPP
 
+#include <QObject>
 #include <QtSerialPort>
+#include "packet_parser.hpp"
 
 class PortInfo
 {
@@ -10,7 +12,7 @@ public:
     QString baud_rate;
 };
 
-class PortManager
+class PortManager : public QObject
 {
 public:
     PortManager();
@@ -22,6 +24,10 @@ public:
 
 private:
     QSerialPort port;
+    PacketParser parser;
+
+private slots:
+    void receive(void);
 };
 
 #endif

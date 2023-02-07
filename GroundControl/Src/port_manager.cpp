@@ -3,12 +3,15 @@
 
 PortManager::PortManager()
 {
-
+    connect(&this->port, &QSerialPort::readyRead, this, &PortManager::receive);
 }
 
 PortManager::~PortManager()
 {
-
+    if (this->port.isOpen())
+    {
+        this->port.close();
+    }
 }
 
 bool PortManager::isOpen(void)
@@ -51,4 +54,15 @@ void PortManager::close(void)
 {
     this->port.close();
     qDebug() << "port" << this->port.portName() << "closed";
+}
+
+void PortManager::receive(void)
+{
+    this->parser.append(this->port.readAll());
+
+    while (this->parser.isPacketAvailable())
+    {
+        Packet packet = this->parser.getPacket();
+        qDebug() << "packet received:" << packet.typ << packet.len;
+    }
 }
