@@ -9,6 +9,8 @@ PlotTab::PlotTab(PlotManager *plot_mgr, QWidget *parent) :
 {
     this->ui->setupUi(this);
 
+    this->ui->bufferSizeLabel->setText(QString::number(this->ui->bufferSizeSlider->value()));
+
     connect(this->ui->showMajorGridCheckBox, &QCheckBox::toggled, this, &PlotTab::toggleShowMajorGridCheckBox);
     connect(this->ui->showMinorGridCheckBox, &QCheckBox::toggled, this, &PlotTab::toggleShowMinorGridCheckBox);
     connect(this->ui->bufferSizeSlider, &QSlider::valueChanged, this, &PlotTab::setBufferSize);

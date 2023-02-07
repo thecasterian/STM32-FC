@@ -23,6 +23,7 @@ private:
 
     PortManager *port_mgr;
     PlotManager *plot_mgr;
+    CommandManager *cmd_mgr;
 
     PortTab *port_tab;
     CommandTab *command_tab;

@@ -9,12 +9,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->port_mgr = new PortManager();
     this->plot_mgr = new PlotManager(this->ui->strmQwtPlot, this->port_mgr);
+    this->cmd_mgr = new CommandManager(this->port_mgr);
 
     /* Tabs. */
     this->ui->tabWidget->clear();
 
     this->port_tab = new PortTab(this->port_mgr);
-    this->command_tab = new CommandTab(this->port_mgr);
+    this->command_tab = new CommandTab(this->cmd_mgr);
     this->plot_tab = new PlotTab(this->plot_mgr);
 
     this->ui->tabWidget->addTab(this->port_tab, "Port");
@@ -37,6 +38,7 @@ MainWindow::~MainWindow()
 
     delete this->port_mgr;
     delete this->plot_mgr;
+    delete this->cmd_mgr;
 
     delete this->port_tab;
     delete this->command_tab;

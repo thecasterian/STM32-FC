@@ -57,6 +57,23 @@ void PortManager::close(void)
     qDebug() << "port" << this->port.portName() << "closed";
 }
 
+bool PortManager::send(uint8_t len, const uint8_t *data)
+{
+    if (!this->isOpen())
+    {
+        qWarning() << "port is not open";
+        return false;
+    }
+
+    if (this->port.write((const char *)data, len) != len)
+    {
+        qWarning() << "failed to write to port" << this->port.portName();
+        return false;
+    }
+
+    return true;
+}
+
 void PortManager::receive(void)
 {
     this->parser.append(this->port.readAll());

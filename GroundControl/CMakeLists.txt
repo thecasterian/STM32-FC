@@ -16,6 +16,7 @@ find_package(Qt5 ${QT_MIN_VERSION} REQUIRED COMPONENTS Core Widgets SerialPort)
 find_package(Qwt ${QWT_MIN_VERSION} REQUIRED)
 
 add_executable(${TARGET}
+    Src/command_manager.cpp
     Src/command_tab.cpp
     Src/main_window.cpp
     Src/main.cpp

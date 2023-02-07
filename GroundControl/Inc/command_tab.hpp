@@ -2,7 +2,7 @@
 #define COMMAND_TAB_HPP
 
 #include <QWidget>
-#include "port_manager.hpp"
+#include "command_manager.hpp"
 
 namespace Ui
 {
@@ -14,13 +14,13 @@ class CommandTab : public QWidget
     Q_OBJECT
 
 public:
-    explicit CommandTab(PortManager *port_mgr, QWidget *parent = nullptr);
+    explicit CommandTab(CommandManager *cmd_mgr, QWidget *parent = nullptr);
     ~CommandTab();
 
 private:
     Ui::CommandTab *ui;
 
-    PortManager *port_mgr;
+    CommandManager *cmd_mgr;
 
 private slots:
     void toggleRedLed(bool checked);
