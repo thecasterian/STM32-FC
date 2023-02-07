@@ -248,7 +248,7 @@
     <enum>Qt::Vertical</enum>
    </property>
   </widget>
-  <widget class="QSlider" name="backLeftSlider">
+  <widget class="QSlider" name="rearLeftSlider">
    <property name="geometry">
     <rect>
      <x>630</x>
@@ -274,10 +274,10 @@
     </rect>
    </property>
    <property name="text">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Back&lt;br&gt;Left&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Rear&lt;br&gt;Left&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="backLeftEdit">
+  <widget class="QLineEdit" name="rearLeftEdit">
    <property name="geometry">
     <rect>
      <x>620</x>
@@ -293,7 +293,7 @@
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="backRightEdit">
+  <widget class="QLineEdit" name="rearRightEdit">
    <property name="geometry">
     <rect>
      <x>670</x>
@@ -319,10 +319,10 @@
     </rect>
    </property>
    <property name="text">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Back&lt;br&gt;Right&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Rear&lt;br&gt;Right&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
-  <widget class="QSlider" name="backRightSlider">
+  <widget class="QSlider" name="rearRightSlider">
    <property name="geometry">
     <rect>
      <x>680</x>

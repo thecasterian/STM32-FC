@@ -10,6 +10,8 @@ class CommandManager : public QObject
 public:
     explicit CommandManager(PortManager *port_mgr);
 
+    bool setThrottle(uint16_t front_left, uint16_t front_right, uint16_t rear_left, uint16_t rear_right);
+    bool togglePwm(bool on);
     bool toggleDebugLed(uint8_t led, bool on);
 
 private:

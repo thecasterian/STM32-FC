@@ -1,4 +1,5 @@
 #include <QDebug>
+#include <cstring>
 #include "command_manager.hpp"
 #include "moc_command_manager.cpp"
 
@@ -10,6 +11,34 @@ CommandManager::CommandManager(PortManager *port_mgr) :
     connect(this->port_mgr, &PortManager::respReceived, this, &CommandManager::receiveResp);
 }
 
+bool CommandManager::setThrottle(uint16_t front_left, uint16_t front_right, uint16_t rear_left, uint16_t rear_right)
+{
+    uint8_t packet[14] = {
+        PACKET_STX, PACKET_TYP_CMD, 0x09, PACKET_CMD_THROT,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, PACKET_ETX
+    };
+
+    memcpy(&packet[4], &front_left, 2U);
+    memcpy(&packet[6], &front_right, 2U);
+    memcpy(&packet[8], &rear_left, 2U);
+    memcpy(&packet[10], &rear_right, 2U);
+
+    packet_calculate_checksum(packet);
+
+    return port_mgr->send(sizeof(packet), packet);
+}
+
+bool CommandManager::togglePwm(bool on)
+{
+    uint8_t arg = on ? (uint8_t)0x01 : (uint8_t)0x00U;
+    uint8_t packet[7] = { PACKET_STX, PACKET_TYP_CMD, 0x02, PACKET_CMD_PWM, arg, 0x00, PACKET_ETX };
+
+    packet_calculate_checksum(packet);
+
+    return port_mgr->send(sizeof(packet), packet);
+}
+
 bool CommandManager::toggleDebugLed(uint8_t led, bool on)
 {
     uint8_t arg = on ? (uint8_t)0x01 : (uint8_t)0x00U;
@@ -17,7 +46,7 @@ bool CommandManager::toggleDebugLed(uint8_t led, bool on)
 
     packet_calculate_checksum(packet);
 
-    return port_mgr->send(7, packet);
+    return port_mgr->send(sizeof(packet), packet);
 }
 
 void CommandManager::receiveResp(uint8_t ack, uint8_t err)

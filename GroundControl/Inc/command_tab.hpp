@@ -23,6 +23,19 @@ private:
     CommandManager *cmd_mgr;
 
 private slots:
+    void setFrontLeftEdit(int value);
+    void setFrontRightEdit(int value);
+    void setRearLeftEdit(int value);
+    void setRearRightEdit(int value);
+
+    void setFrontLeftSlider(const QString &value);
+    void setFrontRightSlider(const QString &value);
+    void setRearLeftSlider(const QString &value);
+    void setRearRightSlider(const QString &value);
+
+    void updateThrottle(void);
+    void togglePwm(bool checked);
+
     void toggleRedLed(bool checked);
     void toggleGreenLed(bool checked);
     void toggleBlueLed(bool checked);
