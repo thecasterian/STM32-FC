@@ -1,3 +1,4 @@
+#include <QDebug>
 #include <QPen>
 #include <qwt_scale_div.h>
 #include "plot_manager.hpp"
@@ -63,6 +64,7 @@ void PlotManager::setBufferSize(int size)
 {
     this->buffer_size = size;
     this->plot->setAxisScale(QwtPlot::xBottom, 0, this->buffer_size);
+    this->plot->replot();
 }
 
 void PlotManager::setCurveNames(const QVector<QString> &names)
@@ -91,11 +93,11 @@ void PlotManager::appendCurveData(const QVector<float> &data)
     Q_ASSERT(this->curves.size() > 0);
     Q_ASSERT(this->curves.size() == data.size());
 
-    if (this->curve_data[0].size() == this->buffer_size)
+    if (this->curve_data[0].size() >= this->buffer_size)
     {
         for (int i = 0; i < this->curves.size(); i++)
         {
-            this->curve_data[i].remove(0);
+            this->curve_data[i].remove(0, this->curve_data[i].size() - this->buffer_size + 1);
         }
     }
 
@@ -109,9 +111,12 @@ void PlotManager::appendCurveData(const QVector<float> &data)
 
 void PlotManager::onZoomed(const QRectF &rect)
 {
+    qDebug() << this->zoom->zoomRectIndex();
+
     if (this->zoom->zoomRectIndex() == 0)
     {
         this->plot->setAxisAutoScale(QwtPlot::yLeft);
+        this->zoom->setZoomBase(true);
     }
 }
 

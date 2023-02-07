@@ -15,11 +15,13 @@ PortTab::PortTab(PortManager *port_mgr, QWidget *parent) :
     connect(this->ui->portConnectPushButton, &QPushButton::clicked, this, &PortTab::toggleConnectPushButton);
 }
 
-PortTab::~PortTab() {
+PortTab::~PortTab()
+{
     delete this->ui;
 }
 
-void PortTab::fillPortComboBox(void) {
+void PortTab::fillPortComboBox(void)
+{
     this->ui->portComboBox->clear();
 
     const auto &port_list = QSerialPortInfo::availablePorts();
@@ -29,7 +31,8 @@ void PortTab::fillPortComboBox(void) {
     }
 }
 
-void PortTab::toggleConnectPushButton(void) {
+void PortTab::toggleConnectPushButton(void)
+{
     if (this->port_mgr->isOpen())
     {
         this->port_mgr->close();
@@ -41,7 +44,8 @@ void PortTab::toggleConnectPushButton(void) {
 
         PortInfo info{port_name, buad_rate};
 
-        if (!this->port_mgr->open(info)) {
+        if (!this->port_mgr->open(info))
+        {
             this->ui->portConnectPushButton->setChecked(false);
         }
     }

@@ -2,10 +2,10 @@
 #define MAIN_WINDOW_HPP
 
 #include <QMainWindow>
-#include <QTimer>
 #include "command_tab.hpp"
 #include "plot_tab.hpp"
 #include "port_tab.hpp"
+#include "sample_counter.hpp"
 
 namespace Ui
 {
@@ -27,6 +27,9 @@ private:
     PortTab *port_tab;
     CommandTab *command_tab;
     PlotTab *plot_tab;
+
+    QLabel *err_label, *smp_label;
+    SampleCounter *smp_counter;
 };
 
 #endif

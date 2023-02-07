@@ -42,6 +42,74 @@
     <string>Show Minor Grid</string>
    </property>
   </widget>
+  <widget class="QSlider" name="bufferSizeSlider">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>80</y>
+     <width>201</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="minimum">
+    <number>500</number>
+   </property>
+   <property name="maximum">
+    <number>5000</number>
+   </property>
+   <property name="singleStep">
+    <number>500</number>
+   </property>
+   <property name="pageStep">
+    <number>500</number>
+   </property>
+   <property name="value">
+    <number>1000</number>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="invertedAppearance">
+    <bool>false</bool>
+   </property>
+   <property name="tickPosition">
+    <enum>QSlider::TicksAbove</enum>
+   </property>
+   <property name="tickInterval">
+    <number>500</number>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>80</y>
+     <width>71</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Buffer Size</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="bufferSizeLabel">
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>80</y>
+     <width>36</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QLabel {
+	qproperty-alignment: AlignRight;
+}</string>
+   </property>
+   <property name="text">
+    <string>5000</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

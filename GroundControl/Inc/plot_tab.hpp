@@ -25,6 +25,7 @@ private:
 private slots:
     void toggleShowMajorGridCheckBox(bool checked);
     void toggleShowMinorGridCheckBox(bool checked);
+    void setBufferSize(int value);
 };
 
 #endif
