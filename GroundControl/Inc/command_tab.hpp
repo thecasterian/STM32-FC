@@ -19,7 +19,13 @@ public:
 
 private:
     Ui::CommandTab *ui;
+
     PortManager *port_mgr;
+
+private slots:
+    void toggleRedLed(bool checked);
+    void toggleGreenLed(bool checked);
+    void toggleBlueLed(bool checked);
 };
 
 #endif
