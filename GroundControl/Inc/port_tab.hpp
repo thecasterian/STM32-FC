@@ -11,6 +11,8 @@ class PortTab;
 
 class PortTab : public QWidget
 {
+    Q_OBJECT
+
 public:
     explicit PortTab(PortManager *port_mgr, QWidget *parent = nullptr);
     ~PortTab();

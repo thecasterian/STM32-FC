@@ -11,6 +11,8 @@ class PlotTab;
 
 class PlotTab : public QWidget
 {
+    Q_OBJECT
+
 public:
     explicit PlotTab(PlotManager *plot_mgr, QWidget *parent = nullptr);
     ~PlotTab();

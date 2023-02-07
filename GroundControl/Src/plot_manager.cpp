@@ -1,9 +1,11 @@
 #include <QPen>
 #include <qwt_scale_div.h>
 #include "plot_manager.hpp"
+#include "moc_plot_manager.cpp"
 
-PlotManager::PlotManager(QwtPlot *plot):
-    plot(plot)
+PlotManager::PlotManager(QwtPlot *plot, PortManager *port_mgr) :
+    plot(plot),
+    port_mgr(port_mgr)
 {
     /* Set axes. */
     this->buffer_size = 1000;
@@ -25,42 +27,55 @@ PlotManager::PlotManager(QwtPlot *plot):
     /* Add legend. */
     this->legend = new QwtLegend();
     this->plot->insertLegend(this->legend);
+
+    connect(this->zoom, &QwtPlotZoomer::zoomed, this, &PlotManager::onZoomed);
+    connect(this->port_mgr, &PortManager::strmReceived, this, &PlotManager::receiveStrm);
+
+    this->setCurveNames({ "X" });
 }
 
-PlotManager::~PlotManager() {
+PlotManager::~PlotManager()
+{
     delete this->grid;
-    delete this->zoom;
+    // delete this->zoom;
     delete this->legend;
-    for (int i = 0; i < this->curves.size(); i++) {
+    for (int i = 0; i < this->curves.size(); i++)
+    {
         delete this->curves[i];
     }
 }
 
-void PlotManager::showMajorGrid(bool checked) {
+void PlotManager::showMajorGrid(bool checked)
+{
     this->grid->enableX(checked);
     this->grid->enableY(checked);
     this->plot->replot();
 }
 
-void PlotManager::showMinorGrid(bool checked) {
+void PlotManager::showMinorGrid(bool checked)
+{
     this->grid->enableXMin(checked);
     this->grid->enableYMin(checked);
     this->plot->replot();
 }
 
-void PlotManager::setBufferSize(int size) {
+void PlotManager::setBufferSize(int size)
+{
     this->buffer_size = size;
     this->plot->setAxisScale(QwtPlot::xBottom, 0, this->buffer_size);
 }
 
-void PlotManager::setCurveNames(const QVector<QString> &names) {
-    for (int i = 0; i < this->curves.size(); i++) {
+void PlotManager::setCurveNames(const QVector<QString> &names)
+{
+    for (int i = 0; i < this->curves.size(); i++)
+    {
         delete this->curves[i];
     }
     this->curves.clear();
     this->curve_data.clear();
 
-    for (int i = 0; i < names.size(); i++) {
+    for (int i = 0; i < names.size(); i++)
+    {
         QwtPlotCurve *c = new QwtPlotCurve(names[i]);
 
         c->setRenderHint(QwtPlotItem::RenderAntialiased, true);
@@ -71,19 +86,44 @@ void PlotManager::setCurveNames(const QVector<QString> &names) {
     this->curve_data.resize(names.size());
 }
 
-void PlotManager::appendCurveData(const QVector<float> &data) {
+void PlotManager::appendCurveData(const QVector<float> &data)
+{
     Q_ASSERT(this->curves.size() > 0);
     Q_ASSERT(this->curves.size() == data.size());
 
-    if (this->curve_data[0].size() == this->buffer_size) {
-        for (int i = 0; i < this->curves.size(); i++) {
+    if (this->curve_data[0].size() == this->buffer_size)
+    {
+        for (int i = 0; i < this->curves.size(); i++)
+        {
             this->curve_data[i].remove(0);
         }
     }
 
-    for (int i = 0; i < this->curves.size(); i++) {
+    for (int i = 0; i < this->curves.size(); i++)
+    {
         this->curve_data[i].append(data[i]);
         this->curves[i]->setSamples(this->curve_data[i]);
     }
     this->plot->replot();
+}
+
+void PlotManager::onZoomed(const QRectF &rect)
+{
+    if (this->zoom->zoomRectIndex() == 0)
+    {
+        this->plot->setAxisAutoScale(QwtPlot::yLeft);
+    }
+}
+
+void PlotManager::receiveStrm(uint8_t len, const uint8_t *dat)
+{
+    QVector<float> dat_float;
+    float x;
+
+    for (int i = 0U; i < len / 4; i++)
+    {
+        memcpy(&x, &dat[i * 4], 4);
+        dat_float.append(x);
+    }
+    this->appendCurveData(dat_float);
 }

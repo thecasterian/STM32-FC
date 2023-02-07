@@ -11,6 +11,8 @@ class CommandTab;
 
 class CommandTab : public QWidget
 {
+    Q_OBJECT
+
 public:
     explicit CommandTab(PortManager *port_mgr, QWidget *parent = nullptr);
     ~CommandTab();

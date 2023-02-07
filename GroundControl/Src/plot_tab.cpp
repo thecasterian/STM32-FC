@@ -1,5 +1,6 @@
 #include "plot_tab.hpp"
 #include "ui_plot_tab.h"
+#include "moc_plot_tab.cpp"
 
 PlotTab::PlotTab(PlotManager *plot_mgr, QWidget *parent) :
     QWidget(parent),

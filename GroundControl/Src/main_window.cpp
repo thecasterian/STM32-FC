@@ -9,7 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->setupUi(this);
 
     this->port_mgr = new PortManager();
-    this->plot_mgr = new PlotManager(this->ui->strmQwtPlot);
+    this->plot_mgr = new PlotManager(this->ui->strmQwtPlot, this->port_mgr);
 
     /* Tabs. */
     this->ui->tabWidget->clear();

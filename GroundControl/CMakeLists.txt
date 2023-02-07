@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.18)
 
 project("STM32-FC Ground Control")
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
 
 set(TARGET "ground")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR})

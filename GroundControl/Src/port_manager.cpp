@@ -1,5 +1,6 @@
 #include <QDebug>
 #include "port_manager.hpp"
+#include "moc_port_manager.cpp"
 
 PortManager::PortManager()
 {
@@ -8,9 +9,9 @@ PortManager::PortManager()
 
 PortManager::~PortManager()
 {
-    if (this->port.isOpen())
+    if (this->isOpen())
     {
-        this->port.close();
+        this->close();
     }
 }
 
@@ -63,6 +64,14 @@ void PortManager::receive(void)
     while (this->parser.isPacketAvailable())
     {
         Packet packet = this->parser.getPacket();
-        qDebug() << "packet received:" << packet.typ << packet.len;
+
+        if (packet.typ == PACKET_TYP_RESP)
+        {
+            emit this->respReceived(packet.dat[0], packet.dat[1]);
+        }
+        else if (packet.typ == PACKET_TYP_STRM)
+        {
+            emit this->strmReceived(packet.len, packet.dat);
+        }
     }
 }

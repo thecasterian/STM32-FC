@@ -1,5 +1,6 @@
 #include "port_tab.hpp"
 #include "ui_port_tab.h"
+#include "moc_port_tab.cpp"
 
 PortTab::PortTab(PortManager *port_mgr, QWidget *parent) :
     QWidget(parent),

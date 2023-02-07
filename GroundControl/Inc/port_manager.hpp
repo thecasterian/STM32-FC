@@ -14,6 +14,8 @@ public:
 
 class PortManager : public QObject
 {
+    Q_OBJECT
+
 public:
     PortManager();
     ~PortManager();
@@ -21,6 +23,10 @@ public:
     bool isOpen(void);
     bool open(const PortInfo &info);
     void close(void);
+
+signals:
+    void respReceived(uint8_t ack, uint8_t err);
+    void strmReceived(uint8_t len, const uint8_t *dat);
 
 private:
     QSerialPort port;

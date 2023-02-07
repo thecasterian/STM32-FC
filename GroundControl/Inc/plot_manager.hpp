@@ -1,15 +1,20 @@
 #ifndef PLOT_MANAGER_HPP
 #define PLOT_MANAGER_HPP
 
+#include <QObject>
 #include <qwt_legend.h>
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 #include <qwt_plot_grid.h>
 #include <qwt_plot_zoomer.h>
+#include "port_manager.hpp"
 
-class PlotManager {
+class PlotManager : public QObject
+{
+    Q_OBJECT
+
 public:
-    explicit PlotManager(QwtPlot *plot);
+    explicit PlotManager(QwtPlot *plot, PortManager *port_mgr);
     ~PlotManager();
 
     void showMajorGrid(bool show);
@@ -24,6 +29,8 @@ private:
     static constexpr QColor MinorGridColor{232, 232, 232};
 
     QwtPlot *plot;
+    PortManager *port_mgr;
+
     QwtPlotGrid *grid;
     QwtPlotZoomer *zoom;
     QwtLegend *legend;
@@ -31,6 +38,10 @@ private:
     QVector<QwtPlotCurve *> curves;
     QVector<QVector<float>> curve_data;
     int buffer_size;
+
+private slots:
+    void onZoomed(const QRectF &rect);
+    void receiveStrm(uint8_t len, const uint8_t *dat);
 };
 
 #endif

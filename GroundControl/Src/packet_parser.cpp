@@ -26,7 +26,7 @@ void PacketParser::append(const QByteArray &data)
         {
             /* STX is found. */
             this->stx = true;
-            this->cnt++;
+            this->cnt = 1;
             ++it;
         }
         else
@@ -77,6 +77,8 @@ void PacketParser::append(const QByteArray &data)
                     /* Packet is valid. */
                     this->packet_queue.enqueue(this->cur_packet);
                 }
+
+                this->stx = false;
             }
 
             this->cnt++;
