@@ -25,6 +25,7 @@ add_executable(${TARGET}
     Src/plot_tab.cpp
     Src/port_manager.cpp
     Src/port_tab.cpp
+    Src/protocol.cpp
     Src/sample_counter.cpp
 )
 

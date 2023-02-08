@@ -1,13 +1,29 @@
+#include <QDebug>
 #include "command_tab.hpp"
 #include "ui_command_tab.h"
 #include "moc_command_tab.cpp"
 
-CommandTab::CommandTab(CommandManager *cmd_mgr, QWidget *parent) :
+CommandTab::CommandTab(CommandManager *cmd_mgr, PlotManager *plot_mgr, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::CommandTab),
-    cmd_mgr(cmd_mgr)
+    cmd_mgr(cmd_mgr),
+    plot_mgr(plot_mgr)
 {
     this->ui->setupUi(this);
+
+    /* Fill the data list. */
+    for (auto &info : strm_data_infos)
+    {
+        StrmDataListWidgetItem *item = new StrmDataListWidgetItem(info.name, info.id);
+        this->strm_data_list_items.append(item);
+        this->ui->availableListWidget->addItem(item);
+    }
+
+    connect(this->ui->moveToSelectedPushButton, &QPushButton::clicked, this, &CommandTab::moveToSelected);
+    connect(this->ui->moveToAvailablePushButton, &QPushButton::clicked, this, &CommandTab::moveToAvailable);
+
+    connect(this->ui->strmUpdatePushButton, &QPushButton::clicked, this, &CommandTab::updateStrm);
+    connect(this->ui->strmPushButton, &QPushButton::toggled, this, &CommandTab::toggleStrm);
 
     connect(this->ui->frontLeftSlider, &QSlider::valueChanged, this, &CommandTab::setFrontLeftEdit);
     connect(this->ui->frontRightSlider, &QSlider::valueChanged, this, &CommandTab::setFrontRightEdit);
@@ -19,7 +35,7 @@ CommandTab::CommandTab(CommandManager *cmd_mgr, QWidget *parent) :
     connect(this->ui->rearLeftEdit, &QLineEdit::textChanged, this, &CommandTab::setRearLeftSlider);
     connect(this->ui->rearRightEdit, &QLineEdit::textChanged, this, &CommandTab::setRearRightSlider);
 
-    connect(this->ui->updatePushButton, &QPushButton::clicked, this, &CommandTab::updateThrottle);
+    connect(this->ui->pwmUpdatePushButton, &QPushButton::clicked, this, &CommandTab::updateThrottle);
     connect(this->ui->pwmPushButton, &QPushButton::toggled, this, &CommandTab::togglePwm);
 
     connect(this->ui->redLedPushButton, &QPushButton::toggled, this, &CommandTab::toggleRedLed);
@@ -30,6 +46,75 @@ CommandTab::CommandTab(CommandManager *cmd_mgr, QWidget *parent) :
 CommandTab::~CommandTab()
 {
     delete this->ui;
+    for (auto &it : this->strm_data_list_items)
+    {
+        delete it;
+    }
+}
+
+void CommandTab::moveToSelected(void)
+{
+    auto selected = this->ui->availableListWidget->selectedItems();
+    for (auto &it : selected)
+    {
+        StrmDataListWidgetItem *item = dynamic_cast<StrmDataListWidgetItem *>(it);
+        if (item != nullptr)
+        {
+            this->ui->availableListWidget->takeItem(this->ui->availableListWidget->row(item));
+            this->ui->selectedListWidget->addItem(item);
+
+            qDebug() << "selected data" << item->text();
+        }
+    }
+}
+
+void CommandTab::moveToAvailable(void)
+{
+    auto selected = this->ui->selectedListWidget->selectedItems();
+    for (auto &it : selected)
+    {
+        StrmDataListWidgetItem *item = dynamic_cast<StrmDataListWidgetItem *>(it);
+        if (item != nullptr)
+        {
+            this->ui->selectedListWidget->takeItem(this->ui->selectedListWidget->row(item));
+            this->ui->availableListWidget->addItem(item);
+
+            qDebug() << "unselected data" << item->text();
+        }
+    }
+}
+
+void CommandTab::updateStrm(void)
+{
+    const int nitems = this->ui->selectedListWidget->count();
+    QVector<uint8_t> ids;
+    QVector<QString> field_names;
+
+    for (int i = 0; i < nitems; i++)
+    {
+        StrmDataListWidgetItem *item = dynamic_cast<StrmDataListWidgetItem *>(this->ui->selectedListWidget->item(i));
+        if (item != nullptr)
+        {
+            ids.append(item->getId());
+            field_names.append(strm_data_infos[item->getId()].field_name);
+        }
+    }
+
+    if (!this->cmd_mgr->setStrm(ids))
+    {
+        return;
+    }
+    this->plot_mgr->setCurveNames(field_names);
+}
+
+void CommandTab::toggleStrm(bool checked)
+{
+    if (!this->cmd_mgr->toggleStrm(checked))
+    {
+        bool old_state = this->ui->strmPushButton->blockSignals(true);
+        this->ui->strmPushButton->setChecked(!checked);
+        this->ui->strmPushButton->blockSignals(old_state);
+    }
 }
 
 void CommandTab::setFrontLeftEdit(int value)
@@ -208,4 +293,19 @@ void CommandTab::toggleBlueLed(bool checked)
         this->ui->blueLedPushButton->setChecked(!checked);
         this->ui->blueLedPushButton->blockSignals(old_state);
     }
+}
+
+StrmDataListWidgetItem::StrmDataListWidgetItem(const QString &name, uint8_t id, QListWidget *parent, int type) :
+    QListWidgetItem(name, parent, type),
+    id(id)
+{}
+
+bool StrmDataListWidgetItem::operator<(const QListWidgetItem &other) const
+{
+    return this->id < dynamic_cast<const StrmDataListWidgetItem &>(other).id;
+}
+
+uint8_t StrmDataListWidgetItem::getId(void) const
+{
+    return this->id;
 }

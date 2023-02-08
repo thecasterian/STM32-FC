@@ -31,8 +31,6 @@ PlotManager::PlotManager(QwtPlot *plot, PortManager *port_mgr) :
 
     connect(this->zoom, &QwtPlotZoomer::zoomed, this, &PlotManager::onZoomed);
     connect(this->port_mgr, &PortManager::strmReceived, this, &PlotManager::receiveStrm);
-
-    this->setCurveNames({ "X" });
 }
 
 PlotManager::~PlotManager()
@@ -86,12 +84,22 @@ void PlotManager::setCurveNames(const QVector<QString> &names)
         this->curves.append(c);
     }
     this->curve_data.resize(names.size());
+
+    this->plot->replot();
 }
 
 void PlotManager::appendCurveData(const QVector<float> &data)
 {
-    Q_ASSERT(this->curves.size() > 0);
-    Q_ASSERT(this->curves.size() == data.size());
+    if (this->curves.size() == 0)
+    {
+        qWarning() << "no curves to append data to";
+        return;
+    }
+    if (this->curves.size() != data.size())
+    {
+        qWarning() << "number of curves and data do not match";
+        return;
+    }
 
     if (this->curve_data[0].size() >= this->buffer_size)
     {
@@ -111,8 +119,6 @@ void PlotManager::appendCurveData(const QVector<float> &data)
 
 void PlotManager::onZoomed(const QRectF &rect)
 {
-    qDebug() << this->zoom->zoomRectIndex();
-
     if (this->zoom->zoomRectIndex() == 0)
     {
         this->plot->setAxisAutoScale(QwtPlot::yLeft);

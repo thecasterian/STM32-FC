@@ -57,7 +57,7 @@ void PortManager::close(void)
     qDebug() << "port" << this->port.portName() << "closed";
 }
 
-bool PortManager::send(uint8_t len, const uint8_t *data)
+bool PortManager::send(uint16_t len, const uint8_t *data)
 {
     if (!this->isOpen())
     {

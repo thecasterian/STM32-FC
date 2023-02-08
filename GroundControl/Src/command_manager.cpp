@@ -11,6 +11,32 @@ CommandManager::CommandManager(PortManager *port_mgr) :
     connect(this->port_mgr, &PortManager::respReceived, this, &CommandManager::receiveResp);
 }
 
+bool CommandManager::setStrm(const QVector<uint8_t> &ids)
+{
+    uint8_t packet[512] = { PACKET_STX, PACKET_TYP_CMD, 0x00, PACKET_CMD_STRM_DAT, 0x00, 0x00 };
+
+    for (int i = 0; i < ids.size(); i++)
+    {
+        packet[i + 4] = ids[i];
+    }
+    packet[2] = ids.size() + 1;
+    packet[ids.size() + 5] = PACKET_ETX;
+
+    packet_calculate_checksum(packet);
+
+    return port_mgr->send(packet[2] + 5U, packet);
+}
+
+bool CommandManager::toggleStrm(bool on)
+{
+    uint8_t arg = on ? (uint8_t)0x01 : (uint8_t)0x00U;
+    uint8_t packet[7] = { PACKET_STX, PACKET_TYP_CMD, 0x02, PACKET_CMD_STRM, arg, 0x00, PACKET_ETX };
+
+    packet_calculate_checksum(packet);
+
+    return port_mgr->send(sizeof(packet), packet);
+}
+
 bool CommandManager::setThrottle(uint16_t front_left, uint16_t front_right, uint16_t rear_left, uint16_t rear_right)
 {
     uint8_t packet[14] = {

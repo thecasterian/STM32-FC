@@ -23,7 +23,7 @@ public:
     bool isOpen(void);
     bool open(const PortInfo &info);
     void close(void);
-    bool send(uint8_t len, const uint8_t *data);
+    bool send(uint16_t len, const uint8_t *data);
 
 signals:
     void respReceived(uint8_t ack, uint8_t err);

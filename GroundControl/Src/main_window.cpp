@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->tabWidget->clear();
 
     this->port_tab = new PortTab(this->port_mgr);
-    this->command_tab = new CommandTab(this->cmd_mgr);
+    this->command_tab = new CommandTab(this->cmd_mgr, this->plot_mgr);
     this->plot_tab = new PlotTab(this->plot_mgr);
 
     this->ui->tabWidget->addTab(this->port_tab, "Port");

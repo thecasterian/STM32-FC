@@ -1,6 +1,9 @@
 #ifndef PROTOCOL_HPP
 #define PROTOCOL_HPP
 
+#include <QMap>
+#include <QString>
+#include <QVector>
 #include <cstdint>
 
 constexpr uint8_t PACKET_STX = 0x02;
@@ -68,5 +71,15 @@ public:
     uint8_t len;
     uint8_t dat[PACKET_LEN_MAX];
 };
+
+class StrmDataInfo
+{
+public:
+    QString name;
+    uint8_t id;
+    QVector<QString> field_name;
+};
+
+extern const QMap<uint8_t, StrmDataInfo> strm_data_infos;
 
 #endif
