@@ -11,9 +11,6 @@
 #include "tim_wrapper.h"
 #include "util.h"
 
-#define DT  .001f
-#define DT2 .0005f
-
 #define qw (q_est[0])
 #define qx (q_est[1])
 #define qy (q_est[2])

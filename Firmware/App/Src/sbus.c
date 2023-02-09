@@ -1,4 +1,5 @@
 #include <string.h>
+#include "led.h"
 #include "ring_buffer.h"
 #include "sbus.h"
 #include "tim_wrapper.h"
@@ -34,8 +35,17 @@ bool sbus_packet_receive(sbus_packet_t *packet) {
     uint8_t c;
     bool res;
     bool success;
+    static uint16_t receive_cnt;
 
     res = false;
+
+    if (__HAL_UART_GET_FLAG(&huart1, UART_FLAG_ORE) || __HAL_UART_GET_FLAG(&huart1, UART_FLAG_NE) ||
+        __HAL_UART_GET_FLAG(&huart1, UART_FLAG_FE) || __HAL_UART_GET_FLAG(&huart1, UART_FLAG_PE)) {
+        __disable_irq();
+        HAL_UART_DeInit(&huart1);
+        HAL_UART_Init(&huart1);
+        __enable_irq();
+    }
 
     if (!parser.stx) {
         /* Find STX. */
@@ -108,6 +118,14 @@ bool sbus_packet_receive(sbus_packet_t *packet) {
                 memcpy(packet, &parser.packet, sizeof(*packet));
 
                 parser.tick = control_timer_get_tick();
+
+                if (receive_cnt == 0U) {
+                    led_blue_toggle();
+                }
+                receive_cnt++;
+                if (receive_cnt >= 50U) {
+                    receive_cnt = 0U;
+                }
 
                 break;
             }

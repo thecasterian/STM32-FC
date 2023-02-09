@@ -30,7 +30,8 @@ bool esc_set_motor_pwm_mapping(const pwm_channel_t mapping[4]);
 /**
  * @brief Sets the throttle of the specified motor.
  *
- * @param[in] throttle Array of throttle value of each motor. A throttle must be in range of [0, 1].
+ * @param[in] throttle Array of throttle value of each motor. A throttle should be in range of [0, 1] or it will be
+ * clipped.
  * @return true if the throttle was set successfully, false otherwise.
  */
 bool esc_set_throttle(const float throttle[4]);

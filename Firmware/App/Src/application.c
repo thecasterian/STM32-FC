@@ -4,7 +4,9 @@
 #include "bmi088.h"
 #include "calib.h"
 #include "command.h"
+#include "config.h"
 #include "esc.h"
+#include "led.h"
 #include "lis2mdl.h"
 #include "main.h"
 #include "protocol.h"
@@ -108,6 +110,7 @@ static void standby(void) {
     /* Check the arming condition. */
     if (sbus_packet_is_arming_pos(&sbus_packet)) {
         pwm_start();
+        led_green_write(LED_STATE_ON);
         mode = FC_MODE_FLIGHT;
         return;
     }
@@ -116,7 +119,14 @@ static void standby(void) {
 }
 
 static void flight(void) {
-    static float throttle[4];
+    float roll, pitch, yaw_rate;
+    float throt_trg, roll_trg, pitch_trg, yaw_rate_trg;
+    float roll_err, pitch_err, yaw_rate_err;
+    static float roll_prv, pitch_prv, yaw_rate_prv;
+    static float roll_err_int, pitch_err_int, yaw_rate_err_int;
+    float roll_err_drv, pitch_err_drv, yaw_rate_err_drv;
+    float roll_out, pitch_out, yaw_rate_out;
+    float throttle[4];
 
     attitude_update();
 
@@ -129,15 +139,55 @@ static void flight(void) {
     /* Check the disarming condition. */
     if (sbus_packet_is_disarming_pos(&sbus_packet)) {
         pwm_stop();
+        led_green_write(LED_STATE_OFF);
         mode = FC_MODE_STANDBY;
         return;
     }
 
-    /* Set throttle. */
-    for (int16_t i = 0; i < 4; i++) {
-        throttle[i] = sbus_ch_map_range(sbus_packet.ch[SBUS_THROTTLE_CH], 0.f, 0.1f);
+    roll = rpy[0];
+    pitch = rpy[1];
+    yaw_rate = ang[2];
+
+    /* Get the control target. */
+    throt_trg = sbus_ch_map_range(sbus_packet.ch[SBUS_THROTTLE_CH], 0.f, 1.f);
+    roll_trg = sbus_ch_map_range(sbus_packet.ch[SBUS_AILERON_CH], -MAX_ROLL_TARGET, MAX_ROLL_TARGET);
+    pitch_trg = sbus_ch_map_range(sbus_packet.ch[SBUS_ELEVATOR_CH], -MAX_PITCH_TARGET, MAX_PITCH_TARGET);
+    yaw_rate_trg = sbus_ch_map_range(sbus_packet.ch[SBUS_RUDDER_CH], -MAX_YAW_RATE_TARGET, MAX_YAW_RATE_TARGET);
+
+    /* Calculate the error. */
+    roll_err = roll_trg - roll;
+    pitch_err = pitch_trg - pitch;
+    yaw_rate_err = yaw_rate_trg - yaw_rate;
+
+    /* Calculate the integral of the error. */
+    roll_err_int += roll_err * DT;
+    pitch_err_int += pitch_err * DT;
+    yaw_rate_err_int += yaw_rate_err * DT;
+
+    /* Calculate the derivative of the error. (Derviation kick reduction applied.) */
+    roll_err_drv = (roll - roll_prv) / DT;
+    pitch_err_drv = (pitch - pitch_prv) / DT;
+    yaw_rate_err_drv = (yaw_rate - yaw_rate_prv) / DT;
+
+    /* Calculate the control output. */
+    roll_out = roll_err * ROLL_PITCH_P_GAIN + roll_err_int * ROLL_PITCH_I_GAIN - roll_err_drv * ROLL_PITCH_D_GAIN;
+    pitch_out = pitch_err * ROLL_PITCH_P_GAIN + pitch_err_int * ROLL_PITCH_I_GAIN - pitch_err_drv * ROLL_PITCH_D_GAIN;
+    yaw_rate_out = yaw_rate_err * YAW_RATE_P_GAIN + yaw_rate_err_int * YAW_RATE_I_GAIN;
+
+    /* Set the throttle. */
+    throttle[0] = throt_trg + roll_out + pitch_out;
+    throttle[1] = throt_trg - roll_out + pitch_out;
+    throttle[2] = throt_trg + roll_out - pitch_out;
+    throttle[3] = throt_trg - roll_out - pitch_out;
+    if (!esc_set_throttle(throttle)) {
+        mode = FC_MODE_EMER;
+        return;
     }
-    esc_set_throttle(throttle);
+
+    /* Update previous values. */
+    roll_prv = roll;
+    pitch_prv = pitch;
+    yaw_rate_prv = yaw_rate;
 }
 
 static void emer(void) {

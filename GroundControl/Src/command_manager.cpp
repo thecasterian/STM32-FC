@@ -83,8 +83,7 @@ PortManager *CommandManager::getPortManager(void)
 
 void CommandManager::receiveResp(uint8_t ack, uint8_t err)
 {
-    Q_UNUSED(ack);
-    Q_UNUSED(err);
+    qDebug() << "resp received:" << ack << err;
 }
 
 static void packet_calculate_checksum(uint8_t *packet)

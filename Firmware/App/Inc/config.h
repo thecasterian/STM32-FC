@@ -9,6 +9,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "const.h"
+
 ///@{
 /** Accelerometer bias. */
 #define ACC_BIAS_X (0.0113836160f)
@@ -58,5 +60,25 @@
 #define STD_GYRO (0.3f)
 /** Standard deviation of the magnetometer normalized. */
 #define STD_MAG (0.8f)
+
+/** Time step. */
+#define DT (.001f)
+/** Half of the time step. */
+#define DT2 (.0005f)
+
+/** Maximum roll target. */
+#define MAX_ROLL_TARGET (5.f * PI / 180.f)
+/** Maximum pitch target. */
+#define MAX_PITCH_TARGET (5.f * PI / 180.f)
+/** Maximum yaw rate target. */
+#define MAX_YAW_RATE_TARGET (45.f * PI / 180.f)
+
+/** PID gains for the roll and pitch. */
+#define ROLL_PITCH_P_GAIN (0.0f)
+#define ROLL_PITCH_I_GAIN (0.0f)
+#define ROLL_PITCH_D_GAIN (0.1f)
+/** PID gains for the yaw rate. */
+#define YAW_RATE_P_GAIN (0.0f)
+#define YAW_RATE_I_GAIN (0.0f)
 
 #endif
