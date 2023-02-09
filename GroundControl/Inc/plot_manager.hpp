@@ -25,9 +25,6 @@ public:
     void appendCurveData(const QVector<float> &data);
 
 private:
-    static constexpr QColor MajorGridColor{192, 192, 192};
-    static constexpr QColor MinorGridColor{232, 232, 232};
-
     QwtPlot *plot;
     PortManager *port_mgr;
 

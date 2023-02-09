@@ -1,8 +1,24 @@
 #include <QDebug>
 #include <QPen>
+#include <QVector>
 #include <qwt_scale_div.h>
 #include "plot_manager.hpp"
 #include "moc_plot_manager.cpp"
+
+static const QColor major_grid_color{192, 192, 192};
+static const QColor minor_grid_color{232, 232, 232};
+static const QVector<QColor> curve_colors{
+    "#1F77B4",
+    "#FF7F0E",
+    "#2CA02C",
+    "#D62728",
+    "#9467BD",
+    "#8C564B",
+    "#E377C2",
+    "#7F7F7F",
+    "#BCBD22",
+    "#17BECF",
+};
 
 PlotManager::PlotManager(QwtPlot *plot, PortManager *port_mgr) :
     plot(plot),
@@ -17,8 +33,8 @@ PlotManager::PlotManager(QwtPlot *plot, PortManager *port_mgr) :
     this->grid = new QwtPlotGrid();
     this->grid->enableX(false);
     this->grid->enableY(false);
-    this->grid->setMajorPen(PlotManager::MajorGridColor, 0.0, Qt::SolidLine);
-    this->grid->setMinorPen(PlotManager::MinorGridColor, 0.0, Qt::SolidLine);
+    this->grid->setMajorPen(major_grid_color, 0.0, Qt::SolidLine);
+    this->grid->setMinorPen(minor_grid_color, 0.0, Qt::SolidLine);
     this->grid->attach(this->plot);
 
     /* Add zoomer. */
@@ -32,7 +48,6 @@ PlotManager::PlotManager(QwtPlot *plot, PortManager *port_mgr) :
     connect(this->zoom, &QwtPlotZoomer::zoomed, this, &PlotManager::onZoomed);
     connect(this->port_mgr, &PortManager::strmReceived, this, &PlotManager::receiveStrm);
 }
-
 PlotManager::~PlotManager()
 {
     delete this->grid;
@@ -79,6 +94,7 @@ void PlotManager::setCurveNames(const QVector<QString> &names)
         QwtPlotCurve *c = new QwtPlotCurve(names[i]);
 
         c->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+        c->setPen(curve_colors[i % curve_colors.size()], 0.0);
 
         c->attach(this->plot);
         this->curves.append(c);
