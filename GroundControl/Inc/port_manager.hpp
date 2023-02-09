@@ -26,6 +26,7 @@ public:
     bool send(uint16_t len, const uint8_t *data);
 
 signals:
+    void portClosed(void);
     void respReceived(uint8_t ack, uint8_t err);
     void strmReceived(uint8_t len, const uint8_t *dat);
 
@@ -35,6 +36,7 @@ private:
 
 private slots:
     void receive(void);
+    void onPortError(QSerialPort::SerialPortError error);
 };
 
 #endif

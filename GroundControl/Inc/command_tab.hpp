@@ -51,6 +51,8 @@ private slots:
     void toggleRedLed(bool checked);
     void toggleGreenLed(bool checked);
     void toggleBlueLed(bool checked);
+
+    void reset(void);
 };
 
 class StrmDataListWidgetItem : public QListWidgetItem

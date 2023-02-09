@@ -16,6 +16,8 @@ public:
     bool togglePwm(bool on);
     bool toggleDebugLed(uint8_t led, bool on);
 
+    PortManager *getPortManager(void);
+
 private:
     PortManager *port_mgr;
 

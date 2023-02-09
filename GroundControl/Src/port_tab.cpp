@@ -13,6 +13,7 @@ PortTab::PortTab(PortManager *port_mgr, QWidget *parent) :
 
     connect(this->ui->portSearchPushButton, &QPushButton::clicked, this, &PortTab::fillPortComboBox);
     connect(this->ui->portConnectPushButton, &QPushButton::clicked, this, &PortTab::toggleConnectPushButton);
+    connect(this->port_mgr, &PortManager::portClosed, this, &PortTab::reset);
 }
 
 PortTab::~PortTab()
@@ -49,4 +50,13 @@ void PortTab::toggleConnectPushButton(void)
             this->ui->portConnectPushButton->setChecked(false);
         }
     }
+}
+
+void PortTab::reset(void)
+{
+    bool old_state = this->ui->portConnectPushButton->blockSignals(true);
+    this->ui->portConnectPushButton->setChecked(false);
+    this->ui->portConnectPushButton->blockSignals(old_state);
+
+    this->fillPortComboBox();
 }

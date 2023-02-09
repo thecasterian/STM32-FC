@@ -5,6 +5,7 @@
 PortManager::PortManager()
 {
     connect(&this->port, &QSerialPort::readyRead, this, &PortManager::receive);
+    connect(&this->port, &QSerialPort::errorOccurred, this, &PortManager::onPortError);
 }
 
 PortManager::~PortManager()
@@ -90,5 +91,19 @@ void PortManager::receive(void)
         {
             emit this->strmReceived(packet.len, packet.dat);
         }
+    }
+}
+
+void PortManager::onPortError(QSerialPort::SerialPortError error)
+{
+    if (error != QSerialPort::NoError)
+    {
+        qWarning() << "error" << error << "occured on port" << this->port.portName();
+
+        bool old_state = this->port.blockSignals(true);
+        this->close();
+        this->port.blockSignals(old_state);
+
+        emit this->portClosed();
     }
 }

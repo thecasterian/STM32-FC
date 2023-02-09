@@ -41,6 +41,8 @@ CommandTab::CommandTab(CommandManager *cmd_mgr, PlotManager *plot_mgr, QWidget *
     connect(this->ui->redLedPushButton, &QPushButton::toggled, this, &CommandTab::toggleRedLed);
     connect(this->ui->greenLedPushButton, &QPushButton::toggled, this, &CommandTab::toggleGreenLed);
     connect(this->ui->blueLedPushButton, &QPushButton::toggled, this, &CommandTab::toggleBlueLed);
+
+    connect(this->cmd_mgr->getPortManager(), &PortManager::portClosed, this, &CommandTab::reset);
 }
 
 CommandTab::~CommandTab()
@@ -293,6 +295,31 @@ void CommandTab::toggleBlueLed(bool checked)
         this->ui->blueLedPushButton->setChecked(!checked);
         this->ui->blueLedPushButton->blockSignals(old_state);
     }
+}
+
+void CommandTab::reset(void)
+{
+    bool old_state;
+
+    old_state = this->ui->strmPushButton->blockSignals(true);
+    this->ui->strmPushButton->setChecked(false);
+    this->ui->strmPushButton->blockSignals(old_state);
+
+    old_state = this->ui->pwmPushButton->blockSignals(true);
+    this->ui->pwmPushButton->setChecked(false);
+    this->ui->pwmPushButton->blockSignals(old_state);
+
+    old_state = this->ui->redLedPushButton->blockSignals(true);
+    this->ui->redLedPushButton->setChecked(false);
+    this->ui->redLedPushButton->blockSignals(old_state);
+
+    old_state = this->ui->greenLedPushButton->blockSignals(true);
+    this->ui->greenLedPushButton->setChecked(false);
+    this->ui->greenLedPushButton->blockSignals(old_state);
+
+    old_state = this->ui->blueLedPushButton->blockSignals(true);
+    this->ui->blueLedPushButton->setChecked(false);
+    this->ui->blueLedPushButton->blockSignals(old_state);
 }
 
 StrmDataListWidgetItem::StrmDataListWidgetItem(const QString &name, uint8_t id, QListWidget *parent, int type) :

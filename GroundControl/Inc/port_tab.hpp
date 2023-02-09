@@ -25,7 +25,7 @@ private:
 private slots:
     void fillPortComboBox(void);
     void toggleConnectPushButton(void);
+    void reset(void);
 };
-
 
 #endif

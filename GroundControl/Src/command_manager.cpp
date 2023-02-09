@@ -75,6 +75,12 @@ bool CommandManager::toggleDebugLed(uint8_t led, bool on)
     return port_mgr->send(sizeof(packet), packet);
 }
 
+PortManager *CommandManager::getPortManager(void)
+{
+    return port_mgr;
+}
+
+
 void CommandManager::receiveResp(uint8_t ack, uint8_t err)
 {
     Q_UNUSED(ack);
