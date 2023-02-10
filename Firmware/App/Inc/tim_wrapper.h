@@ -54,6 +54,13 @@ void pwm_start(void);
 void pwm_stop(void);
 
 /**
+ * @brief Returns whether the PWM output is running.
+ *
+ * @return true if the PWM output is running, false otherwise.
+ */
+bool pwm_is_running(void);
+
+/**
  * @brief Sets the PWM output periods.
  *
  * @param[in] period Array of PWM output periods.

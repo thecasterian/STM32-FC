@@ -15,16 +15,18 @@
 #include "tim_wrapper.h"
 
 typedef enum {
-    FC_MODE_INIT    = 0x00,
-    FC_MODE_STANDBY = 0x01,
-    FC_MODE_FLIGHT  = 0x02,
-    FC_MODE_EMER    = 0x03,
+    FC_MODE_INIT,
+    FC_MODE_STANDBY,
+    FC_MODE_MOTOR_TEST,
+    FC_MODE_FLIGHT,
+    FC_MODE_EMER,
 } fc_mode_t;
 
 static fc_mode_t mode = FC_MODE_INIT;
 static sbus_packet_t sbus_packet;
 
 static void standby(void);
+static void motor_test(void);
 static void flight(void);
 static void emer(void);
 
@@ -54,9 +56,6 @@ void setup(void) {
     packet_parser_init();
     sbus_init();
 
-    /* Wait RF. */
-    while (!sbus_packet_receive(&sbus_packet)) {}
-
     /* Initialization end. */
     mode = FC_MODE_STANDBY;
 }
@@ -70,6 +69,9 @@ void loop(void) {
         case FC_MODE_STANDBY:
             standby();
             break;
+        case FC_MODE_MOTOR_TEST:
+            motor_test();
+            break;
         case FC_MODE_FLIGHT:
             flight();
             break;
@@ -79,6 +81,8 @@ void loop(void) {
         default:
             break;
         }
+
+        streaming_send();
 
         control_timer_clear_flag();
     }
@@ -101,9 +105,10 @@ void loop(void) {
 static void standby(void) {
     attitude_update();
 
-    /* Check the emergency condition. */
-    if (sbus_is_timeout() || sbus_packet_is_emergency_switch_on(&sbus_packet)) {
-        mode = FC_MODE_EMER;
+    /* Check whether the PWM is running. */
+    if (pwm_is_running()) {
+        led_green_write(LED_STATE_ON);
+        mode = FC_MODE_MOTOR_TEST;
         return;
     }
 
@@ -114,8 +119,23 @@ static void standby(void) {
         mode = FC_MODE_FLIGHT;
         return;
     }
+}
 
-    streaming_send();
+static void motor_test(void) {
+    attitude_update();
+
+    /* Check the emergency condition. */
+    if (sbus_is_timeout() || sbus_packet_is_emergency_switch_on(&sbus_packet)) {
+        mode = FC_MODE_EMER;
+        return;
+    }
+
+    /* Check whether the PWM is not running. */
+    if (!pwm_is_running()) {
+        led_green_write(LED_STATE_OFF);
+        mode = FC_MODE_STANDBY;
+        return;
+    }
 }
 
 static void flight(void) {
@@ -180,6 +200,7 @@ static void flight(void) {
     throttle[2] = throt_trg + roll_out - pitch_out;
     throttle[3] = throt_trg - roll_out - pitch_out;
     if (!esc_set_throttle(throttle)) {
+        led_red_write(LED_STATE_ON);
         mode = FC_MODE_EMER;
         return;
     }

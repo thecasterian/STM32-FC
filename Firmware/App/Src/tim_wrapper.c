@@ -44,6 +44,10 @@ void pwm_stop(void) {
     }
 }
 
+bool pwm_is_running(void) {
+    return pwm_en;
+}
+
 void pwm_set_period(const uint32_t period[4]) {
     CONTROL_HTIM->Instance->CCR1 = period[0];
     CONTROL_HTIM->Instance->CCR2 = period[1];

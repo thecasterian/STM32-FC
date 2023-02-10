@@ -20,6 +20,8 @@ void led_red_write(led_state_t state);
 void led_green_write(led_state_t state);
 void led_blue_write(led_state_t state);
 
+void led_red_toggle(void);
+void led_green_toggle(void);
 void led_blue_toggle(void);
 
 #endif
