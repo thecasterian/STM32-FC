@@ -9,8 +9,11 @@
 #ifndef USB_WRAPPER_H
 #define USB_WRAPPER_H
 
-#include <stdint.h>
+#include "ring_buffer.h"
 
-void usb_transmit(uint8_t *buf, uint16_t len);
+extern ring_buffer_t usb_rx_ringbuf;
+
+void usb_send(uint8_t *buf, uint16_t size);
+bool usb_receive(uint8_t *buf, uint16_t size);
 
 #endif

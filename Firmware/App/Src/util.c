@@ -5,6 +5,14 @@ uint16_t pack2(uint8_t b1, uint8_t b0) {
     return (b1 << 8) | b0;
 }
 
+uint8_t byte0(uint16_t x) {
+    return x & 0xFFU;
+}
+
+uint8_t byte1(uint16_t x) {
+    return x >> 8;
+}
+
 int16_t to_int16(uint16_t x) {
     return (int16_t)x;
 }

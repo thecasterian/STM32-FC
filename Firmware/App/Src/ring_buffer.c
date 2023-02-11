@@ -2,37 +2,7 @@
 #include "ring_buffer.h"
 #include "util.h"
 
-#define RING_BUFFER_SIZE 256
-
-typedef struct {
-    uint16_t head;                              /* Head of the queue. */
-    volatile uint16_t tail;                     /* Tail of the queue. Newest byte is written here. */
-    volatile uint8_t buf[RING_BUFFER_SIZE];
-} ringbuf_t;
-
-static ringbuf_t usb_ringbuf;
-static ringbuf_t sbus_ringbuf;
-
-static void ringbuf_push(ringbuf_t *ringbuf, uint8_t *buf, uint16_t size);
-static bool ringbuf_pop(ringbuf_t *ringbuf, uint8_t *buf, uint16_t size);
-
-void usb_ringbuf_push(uint8_t *buf, uint16_t size) {
-    ringbuf_push(&usb_ringbuf, buf, size);
-}
-
-bool usb_ringbuf_pop(uint8_t *buf, uint16_t size) {
-    return ringbuf_pop(&usb_ringbuf, buf, size);
-}
-
-void sbus_ringbuf_push(uint8_t *buf, uint16_t size) {
-    ringbuf_push(&sbus_ringbuf, buf, size);
-}
-
-bool sbus_ringbuf_pop(uint8_t *buf, uint16_t size) {
-    return ringbuf_pop(&sbus_ringbuf, buf, size);
-}
-
-static void ringbuf_push(ringbuf_t *ringbuf, uint8_t *buf, uint16_t size) {
+void ring_buffer_push(ring_buffer_t *ringbuf, uint8_t *buf, uint16_t size) {
     if ((ringbuf->tail + size) < RING_BUFFER_SIZE) {
         memcpy_to_volatile(&ringbuf->buf[ringbuf->tail], &buf[0], size);
         ringbuf->tail += size;
@@ -45,7 +15,7 @@ static void ringbuf_push(ringbuf_t *ringbuf, uint8_t *buf, uint16_t size) {
     }
 }
 
-static bool ringbuf_pop(ringbuf_t *ringbuf, uint8_t *buf, uint16_t size) {
+bool ring_buffer_pop(ring_buffer_t *ringbuf, uint8_t *buf, uint16_t size) {
     bool success;
 
     if (ringbuf->head <= ringbuf->tail) {

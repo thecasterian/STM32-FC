@@ -13,6 +13,9 @@
 #include <stdint.h>
 
 uint16_t pack2(uint8_t b1, uint8_t b0);
+uint8_t byte0(uint16_t x);
+uint8_t byte1(uint16_t x);
+
 int16_t to_int16(uint16_t x);
 
 bool is_boolean_u8(uint8_t x);

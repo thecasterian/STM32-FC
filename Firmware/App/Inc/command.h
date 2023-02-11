@@ -9,7 +9,7 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
-#include "protocol.h"
+#include <stdint.h>
 
 /**
  * @brief Execute a command.

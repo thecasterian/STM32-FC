@@ -7,21 +7,13 @@
 #include "command.h"
 #include "config.h"
 #include "esc.h"
+#include "fc_protocol.h"
 #include "led.h"
 #include "lis2mdl.h"
 #include "main.h"
-#include "protocol.h"
 #include "sbus.h"
-#include "streaming.h"
 #include "tim_wrapper.h"
-
-typedef enum {
-    FC_MODE_INIT,
-    FC_MODE_STANDBY,
-    FC_MODE_MOTOR_TEST,
-    FC_MODE_FLIGHT,
-    FC_MODE_EMER,
-} fc_mode_t;
+#include "usb_wrapper.h"
 
 typedef struct {
     bmi088_t bmi088;
@@ -31,10 +23,13 @@ typedef struct {
     float acc_raw[3], ang_raw[3], mag_raw[3];
 } ahrs_sensor_t;
 
-static fc_mode_t mode = FC_MODE_INIT;
+static uint8_t fc_mode = FC_MODE_INIT;
 
 static ahrs_sensor_t ahrs_sensor;
 static ahrs_t ahrs;
+
+static fc_protocol_channel_t fc_prot_ch;
+static fc_packet_t fc_packet_rx, fc_packet_tx;
 
 static sbus_packet_t sbus_packet;
 
@@ -43,6 +38,7 @@ static void motor_test(void);
 static void flight(void);
 static void emer(void);
 
+static void streaming_send(void);
 static void ahrs_measure(void *sensor, float acc[3], float ang[3], float mag[3]);
 
 void setup(void) {
@@ -69,19 +65,19 @@ void setup(void) {
 
     esc_set_motor_pwm_mapping(motor_pwm_mapping);
 
-    packet_parser_init();
+    /* Initialize the communication channels. */
+    fc_protocol_channel_init(&fc_prot_ch, usb_send, usb_receive);
     sbus_init();
 
     /* Initialization end. */
-    mode = FC_MODE_STANDBY;
+    fc_mode = FC_MODE_STANDBY;
 }
 
 void loop(void) {
-    packet_t packet;
     uint8_t err;
 
     if (control_timer_get_flag()) {
-        switch (mode) {
+        switch (fc_mode) {
         case FC_MODE_STANDBY:
             standby();
             break;
@@ -103,18 +99,19 @@ void loop(void) {
         control_timer_clear_flag();
     }
 
-    if ((mode == FC_MODE_STANDBY) && packet_receive(&packet)) {
-        err = packet_validate(&packet);
-        if (err == ERR_OK) {
-            err = command_execute(packet.dat[0], &packet.dat[1], packet.len - 1U);
+    if ((fc_mode == FC_MODE_STANDBY) && fc_protocol_channel_receive(&fc_prot_ch, &fc_packet_rx)) {
+        /* Validate and execute the command. */
+        err = fc_packet_validate(&fc_packet_rx);
+        if (err == FC_PACKET_ERR_OK) {
+            err = command_execute(fc_packet_rx.dat[0], &fc_packet_rx.dat[1], fc_packet_rx.len - 1U);
         }
-        response_send(err);
+        /* Send the response packet. */
+        fc_packet_create_response(&fc_packet_tx, err);
+        fc_protocol_channel_send(&fc_prot_ch, &fc_packet_tx);
     }
 
     if (sbus_packet_receive(&sbus_packet)) {
-        for (uint16_t i = 0U; i < SBUS_CH_NUM; i++) {
-            rf_ch[i] = (float)sbus_packet.ch[i];
-        }
+
     }
 }
 
@@ -124,7 +121,7 @@ static void standby(void) {
     /* Check whether the PWM is running. */
     if (pwm_is_running()) {
         led_green_write(LED_STATE_ON);
-        mode = FC_MODE_MOTOR_TEST;
+        fc_mode = FC_MODE_MOTOR_TEST;
         return;
     }
 
@@ -132,7 +129,7 @@ static void standby(void) {
     if (sbus_packet_is_arming_pos(&sbus_packet)) {
         pwm_start();
         led_green_write(LED_STATE_ON);
-        mode = FC_MODE_FLIGHT;
+        fc_mode = FC_MODE_FLIGHT;
         return;
     }
 }
@@ -142,14 +139,14 @@ static void motor_test(void) {
 
     /* Check the emergency condition. */
     if (sbus_is_timeout() || sbus_packet_is_emergency_switch_on(&sbus_packet)) {
-        mode = FC_MODE_EMER;
+        fc_mode = FC_MODE_EMER;
         return;
     }
 
     /* Check whether the PWM is not running. */
     if (!pwm_is_running()) {
         led_green_write(LED_STATE_OFF);
-        mode = FC_MODE_STANDBY;
+        fc_mode = FC_MODE_STANDBY;
         return;
     }
 }
@@ -168,7 +165,7 @@ static void flight(void) {
 
     /* Check the emergency condition. */
     if (sbus_is_timeout() || sbus_packet_is_emergency_switch_on(&sbus_packet)) {
-        mode = FC_MODE_EMER;
+        fc_mode = FC_MODE_EMER;
         return;
     }
 
@@ -176,13 +173,13 @@ static void flight(void) {
     if (sbus_packet_is_disarming_pos(&sbus_packet)) {
         pwm_stop();
         led_green_write(LED_STATE_OFF);
-        mode = FC_MODE_STANDBY;
+        fc_mode = FC_MODE_STANDBY;
         return;
     }
 
-    roll = rpy[0];
-    pitch = rpy[1];
-    yaw_rate = ang[2];
+    roll = ahrs.rpy[0];
+    pitch = ahrs.rpy[1];
+    yaw_rate = ahrs_sensor.ang[2];
 
     /* Get the control target. */
     throt_trg = sbus_ch_map_range(sbus_packet.ch[SBUS_THROTTLE_CH], 0.f, 1.f);
@@ -217,7 +214,7 @@ static void flight(void) {
     throttle[3] = throt_trg - roll_out - pitch_out;
     if (!esc_set_throttle(throttle)) {
         led_red_write(LED_STATE_ON);
-        mode = FC_MODE_EMER;
+        fc_mode = FC_MODE_EMER;
         return;
     }
 
@@ -231,6 +228,25 @@ static void emer(void) {
     pwm_stop();
 }
 
+static void streaming_send(void) {
+    static float cov_state_upper_tri[10], cov_proc_upper_tri[10];
+    static const fc_protocol_streaming_field_t fields[14] = {
+        { FC_PACKET_DAT_MODE,       1U, &fc_mode            },
+        { FC_PACKET_DAT_ACC,       12U, ahrs_sensor.acc     },
+        { FC_PACKET_DAT_ANG,       12U, ahrs_sensor.ang     },
+        { FC_PACKET_DAT_MAG,       12U, ahrs_sensor.mag     },
+        { FC_PACKET_DAT_RAW_ACC,   12U, ahrs_sensor.acc_raw },
+        { FC_PACKET_DAT_RAW_ANG,   12U, ahrs_sensor.ang_raw },
+        { FC_PACKET_DAT_RAW_MAG,   12U, ahrs_sensor.mag_raw },
+        { FC_PACKET_DAT_KF_QUAT,   16U, ahrs.q              },
+        { FC_PACKET_DAT_KF_RPY,    12U, ahrs.rpy            },
+        { FC_PACKET_DAT_MEAS_QUAT, 16U, ahrs.q_meas         },
+        { FC_PACKET_DAT_MEAS_RPY,  12U, ahrs.rpy_meas       },
+        { FC_PACKET_DAT_COV_STATE, 40U, cov_state_upper_tri },
+        { FC_PACKET_DAT_COV_PROC,  40U, cov_proc_upper_tri  },
+    };
+}
+
 static void ahrs_measure(void *sensor, float acc[3], float ang[3], float mag[3]) {
     ahrs_sensor_t *s;
     float acc_ss_frm[3], ang_ss_frm[3], mag_ss_frm[3];
@@ -240,9 +256,9 @@ static void ahrs_measure(void *sensor, float acc[3], float ang[3], float mag[3])
     bmi088_read_gyro(&s->bmi088, s->ang_raw);
     lis2mdl_read_mag(&s->lis2mdl, s->mag_raw);
 
-    calib_acc(acc_raw, acc_ss_frm);
-    calib_gyro(ang_raw, ang_ss_frm);
-    calib_mag(mag_raw, mag_ss_frm);
+    calib_acc(s->acc_raw, acc_ss_frm);
+    calib_gyro(s->ang_raw, ang_ss_frm);
+    calib_mag(s->mag_raw, mag_ss_frm);
 
     s->acc[0] = -acc_ss_frm[0];
     s->acc[1] = acc_ss_frm[1];
