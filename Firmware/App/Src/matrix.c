@@ -4,6 +4,12 @@
 
 #define MATRIX_MAX_SIZE 64
 
+void matrix_zero(float *m, uint16_t r, uint16_t c) {
+    for (uint16_t i = 0U; i < r * c; i++) {
+        m[i] = 0.f;
+    }
+}
+
 void matrix_transpose(const float *m, uint16_t r, uint16_t c, float *res) {
     float tmp[MATRIX_MAX_SIZE];
 
@@ -17,7 +23,7 @@ void matrix_transpose(const float *m, uint16_t r, uint16_t c, float *res) {
 }
 
 void matrix_cholesky(const float *m, uint16_t r, float *res) {
-    float tmp[MATRIX_MAX_SIZE] = {0.f};
+    float tmp[MATRIX_MAX_SIZE] = { 0.f };
     float s;
 
     for (uint16_t i = 0U; i < r; i++) {
@@ -42,7 +48,7 @@ void matrix_cholesky(const float *m, uint16_t r, float *res) {
 }
 
 void matrix_inv_sym(const float *m, uint16_t r, float *res) {
-    float L[MATRIX_MAX_SIZE], L_inv[MATRIX_MAX_SIZE] = {0.f}, tmp[MATRIX_MAX_SIZE];
+    float L[MATRIX_MAX_SIZE], L_inv[MATRIX_MAX_SIZE] = { 0.f }, tmp[MATRIX_MAX_SIZE];
 
     matrix_cholesky(m, r, L);
 
@@ -101,7 +107,7 @@ void matrix_sub(const float *a, const float *b, uint16_t r, uint16_t c, float *r
 }
 
 void matrix_mul(const float *a, const float *b, uint16_t r, uint16_t c, uint16_t n, float *res) {
-    float tmp[MATRIX_MAX_SIZE] = {0.f};
+    float tmp[MATRIX_MAX_SIZE] = { 0.f };
 
     for (uint16_t i = 0U; i < r; i++) {
         for (uint16_t j = 0U; j < n; j++) {

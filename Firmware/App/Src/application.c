@@ -1,6 +1,7 @@
 #include <stdio.h>
+#include <string.h>
+#include "ahrs.h"
 #include "application.h"
-#include "attitude.h"
 #include "bmi088.h"
 #include "calib.h"
 #include "command.h"
@@ -22,7 +23,19 @@ typedef enum {
     FC_MODE_EMER,
 } fc_mode_t;
 
+typedef struct {
+    bmi088_t bmi088;
+    lis2mdl_t lis2mdl;
+
+    float acc[3], ang[3], mag[3];
+    float acc_raw[3], ang_raw[3], mag_raw[3];
+} ahrs_sensor_t;
+
 static fc_mode_t mode = FC_MODE_INIT;
+
+static ahrs_sensor_t ahrs_sensor;
+static ahrs_t ahrs;
+
 static sbus_packet_t sbus_packet;
 
 static void standby(void);
@@ -30,7 +43,7 @@ static void motor_test(void);
 static void flight(void);
 static void emer(void);
 
-uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len);
+static void ahrs_measure(void *sensor, float acc[3], float ang[3], float mag[3]);
 
 void setup(void) {
     const pwm_channel_t motor_pwm_mapping[4] = {
@@ -42,14 +55,17 @@ void setup(void) {
 
     control_timer_start();
 
-    bmi088_init();
-    bmi088_set_range(BMI088_ACC_RANGE_24G, BMI088_GYRO_RANGE_2000DPS);
-    bmi088_set_odr_bwp(BMI088_ACC_ODR_1600HZ, BMI088_ACC_BWP_NORMAL, BMI088_GYRO_ODR_1000HZ_BWP_116HZ);
+    /* Initialize the AHRS. */
+    bmi088_init(&ahrs_sensor.bmi088, &hspi1, ACC_NSS_GPIO_Port, ACC_NSS_Pin, GYRO_NSS_GPIO_Port, GYRO_NSS_Pin);
+    bmi088_set_range(&ahrs_sensor.bmi088, BMI088_ACC_RANGE_24G, BMI088_GYRO_RANGE_2000DPS);
+    bmi088_set_odr_bwp(&ahrs_sensor.bmi088, BMI088_ACC_ODR_1600HZ, BMI088_ACC_BWP_NORMAL, BMI088_GYRO_ODR_1000HZ_BWP_116HZ);
 
-    lis2mdl_init();
-    lis2mdl_set_odr(LIS2MDL_ODR_100Hz);
+    lis2mdl_init(&ahrs_sensor.lis2mdl, &hspi1, MAG_NSS_GPIO_Port, MAG_NSS_Pin);
+    lis2mdl_set_odr(&ahrs_sensor.lis2mdl, LIS2MDL_ODR_100Hz);
 
-    attitude_init(1000U);
+    ahrs_init(&ahrs, 0.001f, &ahrs_sensor, ahrs_measure);
+    ahrs_set_stddev(&ahrs, 0.01f, 0.5f, 0.3f, 0.8f);
+    ahrs_init_attitude(&ahrs, 1000U);
 
     esc_set_motor_pwm_mapping(motor_pwm_mapping);
 
@@ -103,7 +119,7 @@ void loop(void) {
 }
 
 static void standby(void) {
-    attitude_update();
+    ahrs_update(&ahrs);
 
     /* Check whether the PWM is running. */
     if (pwm_is_running()) {
@@ -122,7 +138,7 @@ static void standby(void) {
 }
 
 static void motor_test(void) {
-    attitude_update();
+    ahrs_update(&ahrs);
 
     /* Check the emergency condition. */
     if (sbus_is_timeout() || sbus_packet_is_emergency_switch_on(&sbus_packet)) {
@@ -148,7 +164,7 @@ static void flight(void) {
     float roll_out, pitch_out, yaw_rate_out;
     float throttle[4];
 
-    attitude_update();
+    ahrs_update(&ahrs);
 
     /* Check the emergency condition. */
     if (sbus_is_timeout() || sbus_packet_is_emergency_switch_on(&sbus_packet)) {
@@ -213,4 +229,31 @@ static void flight(void) {
 
 static void emer(void) {
     pwm_stop();
+}
+
+static void ahrs_measure(void *sensor, float acc[3], float ang[3], float mag[3]) {
+    ahrs_sensor_t *s;
+    float acc_ss_frm[3], ang_ss_frm[3], mag_ss_frm[3];
+
+    s = (ahrs_sensor_t *)sensor;
+    bmi088_read_acc(&s->bmi088, s->acc_raw);
+    bmi088_read_gyro(&s->bmi088, s->ang_raw);
+    lis2mdl_read_mag(&s->lis2mdl, s->mag_raw);
+
+    calib_acc(acc_raw, acc_ss_frm);
+    calib_gyro(ang_raw, ang_ss_frm);
+    calib_mag(mag_raw, mag_ss_frm);
+
+    s->acc[0] = -acc_ss_frm[0];
+    s->acc[1] = acc_ss_frm[1];
+    s->acc[2] = -acc_ss_frm[2];
+    s->mag[0] = -mag_ss_frm[1];
+    s->mag[1] = mag_ss_frm[0];
+    s->mag[2] = -mag_ss_frm[2];
+
+    // TODO: Apply low pass filters.
+
+    memcpy(acc, s->acc, sizeof(s->acc));
+    memcpy(ang, s->ang, sizeof(s->ang));
+    memcpy(mag, s->mag, sizeof(s->mag));
 }

@@ -9,6 +9,9 @@
 #ifndef BMI088_H
 #define BMI088_H
 
+#include "gpio.h"
+#include "spi.h"
+
 /**
  * @brief BMI088 accelerometer maximum measurement range.
  */
@@ -98,40 +101,67 @@ typedef enum {
 } bmi088_gyro_odr_bwp;
 
 /**
- * @brief Initializes the BMI088.
+ * @brief BMI088 driver structure.
  */
-void bmi088_init(void);
+typedef struct {
+    SPI_HandleTypeDef *hspi;
+
+    GPIO_TypeDef *acc_nss_port;
+    uint16_t acc_nss_pin;
+    GPIO_TypeDef *gyro_nss_port;
+    uint16_t gyro_nss_pin;
+
+    bmi088_acc_range_t acc_range;
+    bmi088_gyro_range_t gyro_range;
+} bmi088_t;
+
+/**
+ * @brief Initializes the BMI088.
+ *
+ * @param bmi088 BMI088 driver structure.
+ * @param hspi SPI handle that the BMI088 is connected to.
+ * @param acc_nss_port Accelerometer NSS GPIO port.
+ * @param acc_nss_pin Accelerometer NSS GPIO pin.
+ * @param gyro_nss_port Gyro NSS GPIO port.
+ * @param gyro_nss_pin Gyro NSS GPIO pin.
+ */
+void bmi088_init(bmi088_t *bmi088, SPI_HandleTypeDef *hspi, GPIO_TypeDef *acc_nss_port, uint16_t acc_nss_pin,
+                 GPIO_TypeDef *gyro_nss_port, uint16_t gyro_nss_pin);
 
 /**
  * @brief Sets the maximum measurement range.
  *
+ * @param bmi088 BMI088 driver structure.
  * @param acc_range Accelerometer maximum measurement range.
  * @param gyro_range Gyro maximum measurement range.
  */
-void bmi088_set_range(bmi088_acc_range_t acc_range, bmi088_gyro_range_t gyro_range);
+void bmi088_set_range(bmi088_t *bmi088, bmi088_acc_range_t acc_range, bmi088_gyro_range_t gyro_range);
 
 /**
  * @brief Sets the output data rate (ODR) and low-pass filter bandwidth parameter (BWP).
  *
+ * @param bmi088 BMI088 driver structure.
  * @param acc_odr Accelerometer ODR.
  * @param acc_bwp Accelerometer BWP.
  * @param gyro_odr_bwp Gyro ODR and BWP.
  */
-void bmi088_set_odr_bwp(bmi088_acc_odr_t acc_odr, bmi088_acc_bwp_t acc_bwp,
+void bmi088_set_odr_bwp(bmi088_t *bmi088, bmi088_acc_odr_t acc_odr, bmi088_acc_bwp_t acc_bwp,
                         bmi088_gyro_odr_bwp gyro_odr_bwp);
 
 /**
  * @brief Reads the accelerometer measurement.
  *
+ * @param bmi088 BMI088 driver structure.
  * @param[out] acc Acceleration in x, y, and z axes (m/s^2).
  */
-void bmi088_read_acc(float acc[3]);
+void bmi088_read_acc(bmi088_t *bmi088, float acc[3]);
 
 /**
  * @brief Reads the gyro measurement.
  *
+ * @param bmi088 BMI088 driver structure.
  * @param[out] ang Angular velocity in x, y, and z axes (rad/s).
  */
-void bmi088_read_gyro(float ang[3]);
+void bmi088_read_gyro(bmi088_t *bmi088, float ang[3]);
 
 #endif

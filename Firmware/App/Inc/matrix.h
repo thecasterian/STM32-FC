@@ -12,6 +12,15 @@
 #include <stdint.h>
 
 /**
+ * @brief Zeros out a matrix.
+ *
+ * @param[out] m Matrix to zero out.
+ * @param r Number of rows.
+ * @param c Number of columns.
+ */
+void matrix_zero(float *m, uint16_t r, uint16_t c);
+
+/**
  * @brief Calculates the transpose of a matrix.
  *
  * @param[in] m Matrix to transpose.

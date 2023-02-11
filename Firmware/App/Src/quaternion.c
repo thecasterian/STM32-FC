@@ -67,7 +67,7 @@ void quaternion_mul(const float q1[4], const float q2[4], float res[4]) {
 }
 
 void quaternion_rot_vec(const float q[4], const float vec[3], float res[3]) {
-    float q_vec[4] = {0.f, vec[0], vec[1], vec[2]}, q_conj[4] = {q[0], -q[1], -q[2], -q[3]}, q_res[4];
+    float q_vec[4] = { 0.f, vec[0], vec[1], vec[2] }, q_conj[4] = { q[0], -q[1], -q[2], -q[3] }, q_res[4];
 
     quaternion_mul(q, q_vec, q_vec);
     quaternion_mul(q_vec, q_conj, q_res);
@@ -78,7 +78,7 @@ void quaternion_rot_vec(const float q[4], const float vec[3], float res[3]) {
 }
 
 void quaternion_rot_vec_inv(const float q[4], const float vec[3], float res[3]) {
-    float q_vec[4] = {0.f, vec[0], vec[1], vec[2]}, q_conj[4] = {q[0], -q[1], -q[2], -q[3]}, q_res[4];
+    float q_vec[4] = { 0.f, vec[0], vec[1], vec[2] }, q_conj[4] = { q[0], -q[1], -q[2], -q[3] }, q_res[4];
 
     quaternion_mul(q_conj, q_vec, q_vec);
     quaternion_mul(q_vec, q, q_res);
