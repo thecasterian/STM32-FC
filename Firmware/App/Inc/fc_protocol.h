@@ -9,8 +9,7 @@
 #ifndef FC_PROTOCOL_H
 #define FC_PROTOCOL_H
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "util.h"
 
 #define FC_PACKET_STX 0x02
 #define FC_PACKET_ETX 0x03
@@ -37,6 +36,7 @@
 #define FC_PACKET_DAT_END   0x41
 
 #define FC_PACKET_DAT_MODE      0x00
+#define FC_PACKET_DAT_TICK      0x01
 #define FC_PACKET_DAT_ACC       0x10
 #define FC_PACKET_DAT_ANG       0x11
 #define FC_PACKET_DAT_MAG       0x12
@@ -49,7 +49,7 @@
 #define FC_PACKET_DAT_MEAS_RPY  0x29
 #define FC_PACKET_DAT_COV_STATE 0x30
 #define FC_PACKET_DAT_COV_PROC  0x31
-#define FC_PACKET_DAT_RF_CH     0x40
+#define FC_PACKET_DAT_RF        0x40
 
 #define FC_MODE_INIT       0x00
 #define FC_MODE_STANDBY    0x01
@@ -76,31 +76,13 @@ typedef struct {
 } fc_packet_t;
 
 /**
- * @brief Function to send bytes to the STM32-FC protocol channel.
- *
- * @param buf Buffer for bytes to send.
- * @param size Required size to send.
- */
-typedef void (*fc_protocol_channel_send_t)(uint8_t *buf, uint16_t size);
-
-/**
- * @brief Function to receive bytes from the STM32-FC protocol channel.
- *
- * @param buf Buffer for received bytes.
- * @param size Required size to receive.
- *
- * @return true if the required size of bytes are received, false otherwise.
- */
-typedef bool (*fc_protocol_channel_receive_t)(uint8_t *buf, uint16_t size);
-
-/**
  * @brief Communication channel for the STM32-FC protocol.
  */
 typedef struct {
     /** Function to send bytes. */
-    fc_protocol_channel_send_t send;
+    channel_send_t send;
     /** Function to receive bytes. */
-    fc_protocol_channel_receive_t receive;
+    channel_receive_t receive;
 
     /** Is STX found during parsing? */
     bool stx;
@@ -125,12 +107,12 @@ typedef struct {
 /**
  * @brief Initializes the channel.
  *
- * @param prot_ch Parser for the STM32-FC protocol packet.
+ * @param prot_ch STM32-FC protocol channel.
  * @param send Function to send bytes.
  * @param receive Function to receive bytes.
  */
-void fc_protocol_channel_init(fc_protocol_channel_t *prot_ch, fc_protocol_channel_send_t send,
-                              fc_protocol_channel_receive_t receive);
+void fc_protocol_channel_init(fc_protocol_channel_t *prot_ch, channel_send_t send,
+                              channel_receive_t receive);
 
 /**
  * @brief Sends a packet to the channel.
@@ -173,6 +155,6 @@ void fc_packet_create_response(fc_packet_t *packet, uint8_t err);
  * @param fields Pointer to the array of fields.
  * @param nfields Number of fields.
  */
-void fc_packet_create_streaming(fc_packet_t *packet, fc_protocol_streaming_field_t *fields, uint16_t nfields);
+void fc_packet_create_streaming(fc_packet_t *packet, const fc_protocol_streaming_field_t *fields, uint16_t nfields);
 
 #endif

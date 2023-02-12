@@ -12,6 +12,24 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+/**
+ * @brief Function to send bytes to a communication channel.
+ *
+ * @param buf Buffer for bytes to send.
+ * @param size Required size to send.
+ */
+typedef void (*channel_send_t)(uint8_t *buf, uint16_t size);
+
+/**
+ * @brief Function to receive bytes from a communication channel.
+ *
+ * @param buf Buffer for received bytes.
+ * @param size Required size to receive.
+ *
+ * @return true if the required size of bytes are received, false otherwise.
+ */
+typedef bool (*channel_receive_t)(uint8_t *buf, uint16_t size);
+
 uint16_t pack2(uint8_t b1, uint8_t b0);
 uint8_t byte0(uint16_t x);
 uint8_t byte1(uint16_t x);

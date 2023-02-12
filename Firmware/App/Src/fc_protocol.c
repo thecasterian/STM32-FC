@@ -1,6 +1,5 @@
 #include <string.h>
 #include "fc_protocol.h"
-#include "util.h"
 
 static const uint16_t crc_lut[256] = {
     0x0000U, 0xC0C1U, 0xC181U, 0x0140U, 0xC301U, 0x03C0U, 0x0280U, 0xC241U,
@@ -39,8 +38,8 @@ static const uint16_t crc_lut[256] = {
 
 static uint16_t fc_packet_crc(uint16_t len, const uint8_t *dat);
 
-void fc_protocol_channel_init(fc_protocol_channel_t *prot_ch, fc_protocol_channel_send_t send,
-                              fc_protocol_channel_receive_t receive) {
+void fc_protocol_channel_init(fc_protocol_channel_t *prot_ch, channel_send_t send,
+                              channel_receive_t receive) {
     prot_ch->send = send;
     prot_ch->receive = receive;
     prot_ch->stx = false;
@@ -165,7 +164,7 @@ void fc_packet_create_response(fc_packet_t *packet, uint8_t err) {
     packet->dat[0] = err;
 }
 
-void fc_packet_create_streaming(fc_packet_t *packet, fc_protocol_streaming_field_t *fields, uint16_t nfields) {
+void fc_packet_create_streaming(fc_packet_t *packet, const fc_protocol_streaming_field_t *fields, uint16_t nfields) {
     packet->typ = FC_PACKET_TYP_STRM;
     packet->len = nfields + 1U;
     packet->dat[0] = nfields;

@@ -14,8 +14,6 @@
 
 #define PWM_TIM_FREQ 84000000.f
 
-typedef uint32_t tim_tick_t;
-
 typedef enum {
     PWM_CHANNEL_1 = 0,
     PWM_CHANNEL_2 = 1,
@@ -41,7 +39,7 @@ void control_timer_clear_flag(void);
 /**
  * @brief Gets the current control timer tick.
  */
-tim_tick_t control_timer_get_tick(void);
+uint32_t control_timer_get_tick(void);
 
 /**
  * @brief Starts PWM output.

@@ -20,7 +20,7 @@ void control_timer_clear_flag(void) {
     control_timer_flag = false;
 }
 
-tim_tick_t control_timer_get_tick(void) {
+uint32_t control_timer_get_tick(void) {
     return control_timer_tick;
 }
 

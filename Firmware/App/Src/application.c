@@ -13,6 +13,7 @@
 #include "main.h"
 #include "sbus.h"
 #include "tim_wrapper.h"
+#include "uart_wrapper.h"
 #include "usb_wrapper.h"
 
 typedef struct {
@@ -31,6 +32,8 @@ static ahrs_t ahrs;
 static fc_protocol_channel_t fc_prot_ch;
 static fc_packet_t fc_packet_rx, fc_packet_tx;
 
+static sbus_channel_t sbus_ch;
+static bool sbus_received;
 static sbus_packet_t sbus_packet;
 
 static void standby(void);
@@ -67,7 +70,9 @@ void setup(void) {
 
     /* Initialize the communication channels. */
     fc_protocol_channel_init(&fc_prot_ch, usb_send, usb_receive);
-    sbus_init();
+    sbus_channel_init(&sbus_ch, uart1_receive);
+
+    uart1_init();
 
     /* Initialization end. */
     fc_mode = FC_MODE_STANDBY;
@@ -99,7 +104,7 @@ void loop(void) {
         control_timer_clear_flag();
     }
 
-    if ((fc_mode == FC_MODE_STANDBY) && fc_protocol_channel_receive(&fc_prot_ch, &fc_packet_rx)) {
+    if (fc_protocol_channel_receive(&fc_prot_ch, &fc_packet_rx)) {
         /* Validate and execute the command. */
         err = fc_packet_validate(&fc_packet_rx);
         if (err == FC_PACKET_ERR_OK) {
@@ -110,9 +115,7 @@ void loop(void) {
         fc_protocol_channel_send(&fc_prot_ch, &fc_packet_tx);
     }
 
-    if (sbus_packet_receive(&sbus_packet)) {
-
-    }
+    sbus_received = sbus_channel_receive(&sbus_ch, &sbus_packet);
 }
 
 static void standby(void) {
@@ -138,7 +141,7 @@ static void motor_test(void) {
     ahrs_update(&ahrs);
 
     /* Check the emergency condition. */
-    if (sbus_is_timeout() || sbus_packet_is_emergency_switch_on(&sbus_packet)) {
+    if (sbus_channel_is_timeout(&sbus_ch) || sbus_packet_is_emergency_switch_on(&sbus_packet)) {
         fc_mode = FC_MODE_EMER;
         return;
     }
@@ -164,7 +167,7 @@ static void flight(void) {
     ahrs_update(&ahrs);
 
     /* Check the emergency condition. */
-    if (sbus_is_timeout() || sbus_packet_is_emergency_switch_on(&sbus_packet)) {
+    if (sbus_channel_is_timeout(&sbus_ch) || sbus_packet_is_emergency_switch_on(&sbus_packet)) {
         fc_mode = FC_MODE_EMER;
         return;
     }
@@ -181,47 +184,49 @@ static void flight(void) {
     pitch = ahrs.rpy[1];
     yaw_rate = ahrs_sensor.ang[2];
 
-    /* Get the control target. */
-    throt_trg = sbus_ch_map_range(sbus_packet.ch[SBUS_THROTTLE_CH], 0.f, 1.f);
-    roll_trg = sbus_ch_map_range(sbus_packet.ch[SBUS_AILERON_CH], -MAX_ROLL_TARGET, MAX_ROLL_TARGET);
-    pitch_trg = sbus_ch_map_range(sbus_packet.ch[SBUS_ELEVATOR_CH], -MAX_PITCH_TARGET, MAX_PITCH_TARGET);
-    yaw_rate_trg = sbus_ch_map_range(sbus_packet.ch[SBUS_RUDDER_CH], -MAX_YAW_RATE_TARGET, MAX_YAW_RATE_TARGET);
+    if (sbus_received) {
+        /* Get the control target. */
+        throt_trg = sbus_packet_map_range(sbus_packet.ch[SBUS_THROTTLE_CH], 0.f, 1.f);
+        roll_trg = sbus_packet_map_range(sbus_packet.ch[SBUS_AILERON_CH], -MAX_ROLL_TARGET, MAX_ROLL_TARGET);
+        pitch_trg = sbus_packet_map_range(sbus_packet.ch[SBUS_ELEVATOR_CH], -MAX_PITCH_TARGET, MAX_PITCH_TARGET);
+        yaw_rate_trg = sbus_packet_map_range(sbus_packet.ch[SBUS_RUDDER_CH], -MAX_YAW_RATE_TARGET, MAX_YAW_RATE_TARGET);
 
-    /* Calculate the error. */
-    roll_err = roll_trg - roll;
-    pitch_err = pitch_trg - pitch;
-    yaw_rate_err = yaw_rate_trg - yaw_rate;
+        /* Calculate the error. */
+        roll_err = roll_trg - roll;
+        pitch_err = pitch_trg - pitch;
+        yaw_rate_err = yaw_rate_trg - yaw_rate;
 
-    /* Calculate the integral of the error. */
-    roll_err_int += roll_err * DT;
-    pitch_err_int += pitch_err * DT;
-    yaw_rate_err_int += yaw_rate_err * DT;
+        /* Calculate the integral of the error. */
+        roll_err_int += roll_err * DT;
+        pitch_err_int += pitch_err * DT;
+        yaw_rate_err_int += yaw_rate_err * DT;
 
-    /* Calculate the derivative of the error. (Derviation kick reduction applied.) */
-    roll_err_drv = (roll - roll_prv) / DT;
-    pitch_err_drv = (pitch - pitch_prv) / DT;
-    yaw_rate_err_drv = (yaw_rate - yaw_rate_prv) / DT;
+        /* Calculate the derivative of the error. (Derviation kick reduction applied.) */
+        roll_err_drv = (roll - roll_prv) / DT;
+        pitch_err_drv = (pitch - pitch_prv) / DT;
+        yaw_rate_err_drv = (yaw_rate - yaw_rate_prv) / DT;
 
-    /* Calculate the control output. */
-    roll_out = roll_err * ROLL_PITCH_P_GAIN + roll_err_int * ROLL_PITCH_I_GAIN - roll_err_drv * ROLL_PITCH_D_GAIN;
-    pitch_out = pitch_err * ROLL_PITCH_P_GAIN + pitch_err_int * ROLL_PITCH_I_GAIN - pitch_err_drv * ROLL_PITCH_D_GAIN;
-    yaw_rate_out = yaw_rate_err * YAW_RATE_P_GAIN + yaw_rate_err_int * YAW_RATE_I_GAIN;
+        /* Calculate the control output. */
+        roll_out = roll_err * ROLL_PITCH_P_GAIN + roll_err_int * ROLL_PITCH_I_GAIN - roll_err_drv * ROLL_PITCH_D_GAIN;
+        pitch_out = pitch_err * ROLL_PITCH_P_GAIN + pitch_err_int * ROLL_PITCH_I_GAIN - pitch_err_drv * ROLL_PITCH_D_GAIN;
+        yaw_rate_out = yaw_rate_err * YAW_RATE_P_GAIN + yaw_rate_err_int * YAW_RATE_I_GAIN;
 
-    /* Set the throttle. */
-    throttle[0] = throt_trg + roll_out + pitch_out;
-    throttle[1] = throt_trg - roll_out + pitch_out;
-    throttle[2] = throt_trg + roll_out - pitch_out;
-    throttle[3] = throt_trg - roll_out - pitch_out;
-    if (!esc_set_throttle(throttle)) {
-        led_red_write(LED_STATE_ON);
-        fc_mode = FC_MODE_EMER;
-        return;
+        /* Set the throttle. */
+        throttle[0] = throt_trg + roll_out + pitch_out;
+        throttle[1] = throt_trg - roll_out + pitch_out;
+        throttle[2] = throt_trg + roll_out - pitch_out;
+        throttle[3] = throt_trg - roll_out - pitch_out;
+        if (!esc_set_throttle(throttle)) {
+            led_red_write(LED_STATE_ON);
+            fc_mode = FC_MODE_EMER;
+            return;
+        }
+
+        /* Update previous values. */
+        roll_prv = roll;
+        pitch_prv = pitch;
+        yaw_rate_prv = yaw_rate;
     }
-
-    /* Update previous values. */
-    roll_prv = roll;
-    pitch_prv = pitch;
-    yaw_rate_prv = yaw_rate;
 }
 
 static void emer(void) {
@@ -229,9 +234,11 @@ static void emer(void) {
 }
 
 static void streaming_send(void) {
+    static uint32_t tick;
     static float cov_state_upper_tri[10], cov_proc_upper_tri[10];
-    static const fc_protocol_streaming_field_t fields[14] = {
+    static const fc_protocol_streaming_field_t fields[15] = {
         { FC_PACKET_DAT_MODE,       1U, &fc_mode            },
+        { FC_PACKET_DAT_TICK,       4U, &tick               },
         { FC_PACKET_DAT_ACC,       12U, ahrs_sensor.acc     },
         { FC_PACKET_DAT_ANG,       12U, ahrs_sensor.ang     },
         { FC_PACKET_DAT_MAG,       12U, ahrs_sensor.mag     },
@@ -244,7 +251,15 @@ static void streaming_send(void) {
         { FC_PACKET_DAT_MEAS_RPY,  12U, ahrs.rpy_meas       },
         { FC_PACKET_DAT_COV_STATE, 40U, cov_state_upper_tri },
         { FC_PACKET_DAT_COV_PROC,  40U, cov_proc_upper_tri  },
+        { FC_PACKET_DAT_RF,        32U, sbus_packet.ch      }
     };
+
+    tick = control_timer_get_tick();
+
+    // TODO: Calculate upper triangular parts of covariance matrices.
+
+    fc_packet_create_streaming(&fc_packet_tx, fields, 15U);
+    fc_protocol_channel_send(&fc_prot_ch, &fc_packet_tx);
 }
 
 static void ahrs_measure(void *sensor, float acc[3], float ang[3], float mag[3]) {
