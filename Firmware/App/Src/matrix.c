@@ -119,3 +119,15 @@ void matrix_mul(const float *a, const float *b, uint16_t r, uint16_t c, uint16_t
 
     memcpy(res, tmp, r * n * sizeof(*res));
 }
+
+void matrix_get_upper_triangular(const float *m, uint16_t r, uint16_t c, float *res) {
+    uint16_t cnt;
+
+    cnt = 0U;
+    for (uint16_t i = 0; i < r; i++) {
+        for (uint16_t j = i; j < c; j++) {
+            res[cnt] = m[i * c + j];
+            cnt++;
+        }
+    }
+}

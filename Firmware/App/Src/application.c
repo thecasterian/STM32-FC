@@ -10,7 +10,9 @@
 #include "fc_protocol.h"
 #include "led.h"
 #include "lis2mdl.h"
+#include "lpf.h"
 #include "main.h"
+#include "matrix.h"
 #include "sbus.h"
 #include "tim_wrapper.h"
 #include "uart_wrapper.h"
@@ -29,6 +31,8 @@ static uint8_t fc_mode = FC_MODE_INIT;
 static ahrs_sensor_t ahrs_sensor;
 static ahrs_t ahrs;
 
+static lpf3_t lpf_acc, lpf_ang, lpf_mag;
+
 static fc_protocol_channel_t fc_prot_ch;
 static fc_packet_t fc_packet_rx, fc_packet_tx;
 
@@ -37,8 +41,8 @@ static bool sbus_received;
 static sbus_packet_t sbus_packet;
 
 static void standby(void);
-static void motor_test(void);
 static void flight(void);
+static void motor_test(void);
 static void emer(void);
 
 static void streaming_send(void);
@@ -66,6 +70,10 @@ void setup(void) {
     ahrs_set_stddev(&ahrs, 0.01f, 0.5f, 0.3f, 0.8f);
     ahrs_init_attitude(&ahrs, 1000U);
 
+    lpf3_init(&lpf_acc, 3U, 0.001f, 50.f);
+    lpf3_init(&lpf_ang, 3U, 0.001f, 50.f);
+    lpf3_init(&lpf_mag, 3U, 0.001f, 50.f);
+
     esc_set_motor_pwm_mapping(motor_pwm_mapping);
 
     /* Initialize the communication channels. */
@@ -86,11 +94,11 @@ void loop(void) {
         case FC_MODE_STANDBY:
             standby();
             break;
-        case FC_MODE_MOTOR_TEST:
-            motor_test();
-            break;
         case FC_MODE_FLIGHT:
             flight();
+            break;
+        case FC_MODE_MOTOR_TEST:
+            motor_test();
             break;
         case FC_MODE_EMER:
             emer();
@@ -255,8 +263,8 @@ static void streaming_send(void) {
     };
 
     tick = control_timer_get_tick();
-
-    // TODO: Calculate upper triangular parts of covariance matrices.
+    matrix_get_upper_triangular(ahrs.P, 4, 4, cov_state_upper_tri);
+    matrix_get_upper_triangular(ahrs.Q, 4, 4, cov_proc_upper_tri);
 
     fc_packet_create_streaming(&fc_packet_tx, fields, 15U);
     fc_protocol_channel_send(&fc_prot_ch, &fc_packet_tx);
@@ -282,7 +290,9 @@ static void ahrs_measure(void *sensor, float acc[3], float ang[3], float mag[3])
     s->mag[1] = mag_ss_frm[0];
     s->mag[2] = -mag_ss_frm[2];
 
-    // TODO: Apply low pass filters.
+    lpf3_update(&lpf_acc, s->acc, s->acc);
+    lpf3_update(&lpf_ang, s->ang, s->ang);
+    lpf3_update(&lpf_mag, s->mag, s->mag);
 
     memcpy(acc, s->acc, sizeof(s->acc));
     memcpy(ang, s->ang, sizeof(s->ang));

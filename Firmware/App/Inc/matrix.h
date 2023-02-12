@@ -114,5 +114,14 @@ void matrix_sub(const float *a, const float *b, uint16_t r, uint16_t c, float *r
  */
 void matrix_mul(const float *a, const float *b, uint16_t r, uint16_t c, uint16_t n, float *res);
 
+/**
+ * @brief Gets the upper triangular part of a matrix.
+ *
+ * @param m Matrix.
+ * @param r Number of rows.
+ * @param c Number of columns.
+ * @param res Upper triangular part of the matrix in row-major order.
+ */
+void matrix_get_upper_triangular(const float *m, uint16_t r, uint16_t c, float *res);
 
 #endif
